@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ATS Resume Builder 100% compatível com Workday, SuccessFactors, Greenhouse, Lumesse, Taleo, Ashby. Importe PDF oficial do LinkedIn e gere currículo scanner-friendly em 1 clique." />
+  <meta name="keywords" content="ATS Builder, Resume Builder, Currículo ATS, Gerador de currículo, Importar PDF LinkedIn, Workday, Greenhouse, Scanners de IA Recrutamento" />
+  <meta name="author" content="Fabrício Duarte" />
+  <meta name="robots" content="index, follow" />
+
+  <meta property="og:title" content="ATS Resume Builder · Gerador & Scanner Friendly" />
+  <meta property="og:description" content="Criador de currículos 100% compatível com scanners de IA recrutadoras. Importe PDF oficial do LinkedIn, exporte currículo ATS em PDF pós-revisão." />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="pt_BR" />
+  <meta property="og:url" content="https://bioadsl.github.io/ats-builder/" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ATS Resume Builder · Gerador Scanner Friendly" />
+  <meta name="twitter:description" content="Import PDF LinkedIn + 100% compatível com Workday, Greenhouse, Taleo. Sem tabelas, sem imagens — só texto puro indexável." />
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%236366f1'/><text x='50' y='68' font-size='55' text-anchor='middle' font-family='Arial,sans-serif' font-weight='bold' fill='white'>Q</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- PDF.js - Leitura de PDFs do LinkedIn (engine de parsing) -->
+  <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"
+          crossorigin="anonymous" referrerpolicy="no-referrer"
+          onerror="window.__pdfjsCdnFailed = true;"></script>
+  <script>
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+    }
+  </script>
+
+  <title>ATS Resume Builder · Gerador Scanner Friendly</title>
+</head>
+<body>
+  <header class="header">
+    <nav class="nav container">
+      <a href="#" class="nav__logo" aria-label="Ir para o início">
+        <span class="logo__icon">Q</span>
+        <span class="logo__text">ATS Builder</span>
+      </a>
+      <ul class="nav__links" role="menubar">
+        <li role="none"><a role="menuitem" href="https://bioadsl.github.io/resume/" class="nav__link" target="_blank" rel="noopener noreferrer">← Voltar ao Portfólio</a></li>
+      </ul>
+      <div class="nav__actions">
+        <button id="themeToggle" class="theme-toggle" aria-label="Alternar tema claro/escuro" title="Alternar tema">
+          <svg class="icon icon--sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="icon icon--moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+        <button id="menuToggle" class="menu-toggle" aria-label="Abrir menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ATS Resume Builder Section (standalone app) -->
+    <section id="ats-builder" class="section section--alt">
+      <div class="container">
+        <div class="section__header">
+          <span class="section__eyebrow">💼 Ferramenta Profissional</span>
+          <h2 class="section__title">ATS Resume Builder · Gerador & Scanner Friendly</h2>
+          <p class="section__subtitle">Criador de currículos 100% compatível com os principais scanners e agentes de IA recrutadoras: <strong>Workday, SuccessFactors, Greenhouse, Lumesse, Taleo, Ashby</strong>. Estrutura semântica, sem tabelas aninhadas, sem imagens nem ícones no PDF final — texto puro indexável.</p>
+        </div>
+
+        <!-- ATS Validator Score Panel -->
+        <div class="ats-score" id="atsScore" role="region" aria-label="Validador ATS em tempo real">
+          <div class="ats-score__left">
+            <div class="ats-score__ring">
+              <div class="ats-score__number" id="atsScoreValue">0</div>
+              <div class="ats-score__label">pts · Score ATS</div>
+            </div>
+            <div class="ats-score__info">
+              <div class="ats-score__status" id="atsScoreStatus">Carregando análise...</div>
+              <div class="ats-score__desc" id="atsScoreDesc">Preencha o formulário ao lado para que nosso validador em tempo real analise a compatibilidade com scanners de IA.</div>
+            </div>
+          </div>
+          <div class="ats-score__actions">
+            <button class="btn btn--primary" id="atsPrintBtn" type="button" disabled>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+              Exportar PDF ATS
+            </button>
+            <label class="btn btn--outline btn--file-label" for="atsFileInput">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              Importar PDF do LinkedIn
+              <input id="atsFileInput" type="file" accept="application/pdf,.pdf" hidden />
+            </label>
+            <button class="btn btn--ghost" id="atsFillDemo" type="button">Auto-preencher demo</button>
+            <button class="btn btn--ghost" id="atsClearBtn" type="button">Limpar tudo</button>
+          </div>
+        </div>
+
+        <!-- Validator Rules List -->
+        <ul class="ats-rules" id="atsRulesList" aria-live="polite"></ul>
+
+        <!-- LinkedIn PDF Import Panel -->
+        <div id="atsImportPanel" class="ats-import" hidden>
+          <!-- Estado 1: Dropzone grande -->
+          <div class="ats-import__panel ats-import__dropzone" id="atsDropzone" role="button" tabindex="0" aria-label="Arraste seu PDF exportado do LinkedIn aqui">
+            <div class="ats-import__icon">📥</div>
+            <h3 class="ats-import__title">Arraste e solte seu PDF do LinkedIn aqui</h3>
+            <p class="ats-import__hint">Ou clique no botão <strong>"Importar PDF do LinkedIn"</strong> acima. Formatos suportados: PDF oficial exportado diretamente do seu perfil do LinkedIn. Tamanho máximo: <strong>10MB</strong>.</p>
+            <div class="ats-import__progress" hidden>
+              <div class="ats-import__progress-bar" id="atsProgressBar"></div>
+              <div class="ats-import__progress-text" id="atsProgressText">Processando página 0 / 0...</div>
+            </div>
+            <p class="ats-import__error" id="atsImportError" hidden></p>
+          </div>
+
+          <!-- Estado 2: Banner compacto + review full-width -->
+          <div class="ats-import__compact" id="atsImportCompact" hidden>
+            <div class="ats-import__compact-left">
+              <div class="ats-import__compact-icon">✅</div>
+              <div class="ats-import__compact-meta">
+                <div class="ats-import__compact-file" id="atsCompactFile">—</div>
+                <div class="ats-import__compact-sub" id="atsCompactSub">Extração concluída. Campos mapeados do seu perfil.</div>
+              </div>
+            </div>
+            <div class="ats-import__compact-actions">
+              <button class="btn btn--outline btn--sm" id="atsReuploadBtn" type="button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                Enviar novo PDF
+              </button>
+              <button class="btn btn--ghost btn--sm" id="atsImportCloseBtn" type="button">Fechar</button>
+            </div>
+          </div>
+
+          <div class="ats-import__review ats-import__panel" id="atsImportReview" hidden>
+            <div class="ats-import__review-head">
+              <div>
+                <h3 class="ats-import__title" style="margin:0 0 0.25rem 0;">📋 Revisão dos dados extraídos</h3>
+                <p class="ats-import__hint" style="margin:0;">Os campos abaixo foram mapeados do seu PDF. Clique no link de cada item para navegar direto ao passo correspondente no formulário e ajustar o que precisar.</p>
+              </div>
+            </div>
+            <div class="ats-import__review-stats" id="atsImportStats"></div>
+            <div class="ats-import__review-tip">
+              💡 <strong>Dica:</strong> Campos destacados em ⚠️ não foram mapeados automaticamente. Preencha-os manualmente diretamente no formulário ao lado.
+            </div>
+          </div>
+        </div>
+
+        <!-- Final Thank-you Pix banner -->
+        <div class="ats-thanks" id="atsThanksBanner" hidden>
+          <div class="ats-thanks__inner">
+            <div class="ats-thanks__icon">☕</div>
+            <div class="ats-thanks__content">
+              <div class="ats-thanks__title">Se foi útil para você, deixe um café!</div>
+              <div class="ats-thanks__pix">
+                <span class="ats-thanks__pix-label">Pix:</span>
+                <span class="ats-thanks__pix-value" id="pixValue" title="Clique para copiar">61984260515</span>
+                <button class="btn btn--sm" id="pixCopyBtn" type="button">📋 Copiar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Builder 2-col Layout: Form + Live Preview -->
+        <div class="ats-wrapper">
+          <!-- LEFT: Multi-step Form -->
+          <div class="ats-form">
+            <div class="ats-form__stepper" role="tablist" id="atsStepper">
+              <button class="ats-step active" data-step="0" role="tab" aria-selected="true">1. Pessoal</button>
+              <button class="ats-step" data-step="1" role="tab">2. Resumo</button>
+              <button class="ats-step" data-step="2" role="tab">3. Habilidades</button>
+              <button class="ats-step" data-step="3" role="tab">4. Experiência</button>
+              <button class="ats-step" data-step="4" role="tab">5. Formação</button>
+              <button class="ats-step" data-step="5" role="tab">6. Certificações</button>
+            </div>
+
+            <form id="atsForm" class="ats-form__panel" autocomplete="on" novalidate>
+              <div class="ats-step__panel" data-step-panel="0">
+                <h3 class="ats-step__title">👤 Dados Pessoais</h3>
+                <p class="ats-step__hint">Evite abreviações no nome completo. Use endereço de cidade/estado — não precisa de CEP nem endereço residencial completo.</p>
+                <div class="ats-form__grid">
+                  <label class="ats-field"><span>Nome completo *</span><input name="fullName" required placeholder="Fabrício Duarte da Silva" maxlength="80"></label>
+                  <label class="ats-field"><span>Cargo profissional *</span><input name="role" required placeholder="QA Automation Engineer / Senior Test Analyst" maxlength="70"></label>
+                  <label class="ats-field"><span>E-mail profissional *</span><input name="email" type="email" required placeholder="voce@email.com" maxlength="80"></label>
+                  <label class="ats-field"><span>Telefone / WhatsApp</span><input name="phone" placeholder="(61) 98426-0515" maxlength="25"></label>
+                  <label class="ats-field"><span>Localização (Cidade - UF)</span><input name="location" placeholder="Brasília - DF" maxlength="40"></label>
+                  <label class="ats-field"><span>LinkedIn (URL)</span><input name="linkedin" type="url" placeholder="https://linkedin.com/in/seu-perfil" maxlength="120"></label>
+                  <label class="ats-field ats-field--full"><span>GitHub / Portfólio (URL)</span><input name="portfolio" type="url" placeholder="https://github.com/bioadsl" maxlength="120"></label>
+                </div>
+              </div>
+
+              <div class="ats-step__panel" data-step-panel="1" hidden>
+                <h3 class="ats-step__title">📝 Resumo Profissional / Executive Summary</h3>
+                <p class="ats-step__hint">Escreva 3–5 frases de alto impacto. Palavras-chave de cargo e setores (QA, Automação, Selenium, DevOps, Financeiro, Telecom) garantem match com os scanners de IA.</p>
+                <label class="ats-field ats-field--full"><span>Resumo profissional *</span>
+                  <textarea name="summary" required rows="7" maxlength="750" placeholder="Analista de Testes Sênior / QA Automation Engineer com X anos de experiência em automação de testes Web/Mobile, validação de APIs REST e cultura Shift-Left em projetos de missão crítica dos setores financeiro e de segurança pública..."></textarea>
+                </label>
+                <small class="ats-counter"><span id="summaryCount">0</span>/750 caracteres</small>
+              </div>
+
+              <div class="ats-step__panel" data-step-panel="2" hidden>
+                <h3 class="ats-step__title">🧩 Matriz de Habilidades</h3>
+                <p class="ats-step__hint">Separe as competências por vírgula. Quanto mais palavras-chave do anúncio de vaga aqui, maior a pontuação ATS (ex: Selenium, Cypress, Postman, Java, Python, SQL, Scrum, CI/CD).</p>
+                <label class="ats-field ats-field--full"><span>Linguagens & Tecnologias *</span>
+                  <textarea name="skills" required rows="3" maxlength="600" placeholder="Java, Python, JavaScript, Ruby, SQL, COBOL, HTML, CSS, TypeScript"></textarea>
+                </label>
+                <label class="ats-field ats-field--full"><span>Frameworks de Automação</span>
+                  <textarea name="frameworks" rows="3" maxlength="600" placeholder="Selenium WebDriver, Cypress, Playwright, Katalon Studio, Robot Framework, Cucumber, JUnit, Behave, Capybara, RestAssured"></textarea>
+                </label>
+                <label class="ats-field ats-field--full"><span>Ferramentas & Metodologias</span>
+                  <textarea name="tools" rows="3" maxlength="600" placeholder="Postman, Newman, Swagger, JMeter, Jenkins, Git, Jira, TestLink, QASE, SonarQube, AWS, Scrum, Kanban, Shift-Left, ISTQB"></textarea>
+                </label>
+              </div>
+
+              <div class="ats-step__panel" data-step-panel="3" hidden>
+                <div class="ats-step__header-row">
+                  <h3 class="ats-step__title">💼 Experiência Profissional</h3>
+                  <button class="btn btn--ghost btn--sm" type="button" id="atsAddExpBtn">+ Adicionar cargo</button>
+                </div>
+                <p class="ats-step__hint">Mínimo recomendado: <strong>3 cargos recentes</strong>. Use verbos no passado (implementei, liderei, reduzi, otimizei) e números (%, R$, QTD) para cada conquista — IA recrutadoras adoram impacto mensurável.</p>
+                <div id="atsExpList"></div>
+              </div>
+
+              <div class="ats-step__panel" data-step-panel="4" hidden>
+                <div class="ats-step__header-row">
+                  <h3 class="ats-step__title">🎓 Formação Acadêmica</h3>
+                  <button class="btn btn--ghost btn--sm" type="button" id="atsAddEduBtn">+ Adicionar curso</button>
+                </div>
+                <div id="atsEduList"></div>
+              </div>
+
+              <div class="ats-step__panel" data-step-panel="5" hidden>
+                <div class="ats-step__header-row">
+                  <h3 class="ats-step__title">🏆 Certificações e Cursos</h3>
+                  <button class="btn btn--ghost btn--sm" type="button" id="atsAddCertBtn">+ Adicionar certificação</button>
+                </div>
+                <div id="atsCertList"></div>
+              </div>
+
+              <div class="ats-form__nav">
+                <button type="button" class="btn btn--ghost" id="atsPrevBtn" disabled>← Anterior</button>
+                <button type="button" class="btn btn--primary" id="atsNextBtn">Próximo →</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- RIGHT: Live ATS-friendly Preview -->
+          <aside class="ats-preview" aria-label="Prévia do currículo compatível ATS">
+            <div class="ats-preview__toolbar">
+              <span class="ats-preview__tag">📄 Prévia ATS · Modo texto-indexável</span>
+            </div>
+            <div class="ats-preview__paper" id="atsPreviewPaper" data-role="cv-exportable">
+              <header class="cv__header">
+                <h1 class="cv__name" id="cvName">NOME COMPLETO</h1>
+                <p class="cv__role" id="cvRole">Cargo Profissional</p>
+                <div class="cv__contact" id="cvContact"></div>
+              </header>
+              <section class="cv__section">
+                <h2>RESUMO PROFISSIONAL</h2>
+                <p id="cvSummary" class="cv__empty">Seu resumo executivo aparecerá aqui. Mínimo recomendado: 250 caracteres com palavras-chave relevantes.</p>
+              </section>
+              <section class="cv__section">
+                <h2>HABILIDADES</h2>
+                <div id="cvSkills" class="cv__empty">Java · Python · SQL · JavaScript · Selenium · Postman · Cypress · Jenkins · Jira · Scrum</div>
+              </section>
+              <section class="cv__section">
+                <h2>EXPERIÊNCIA PROFISSIONAL</h2>
+                <div id="cvExp" class="cv__empty">Exemplo:<br><strong>EMPRESA</strong> — Cargo · Jan/2023 – Atual · Cidade - UF<br>• Implementei framework de automação reduzindo tempo de regressão em 60%.<br>• Liderava equipe de 3 QAs e integração CI/CD.</div>
+              </section>
+              <section class="cv__section">
+                <h2>FORMAÇÃO ACADÊMICA</h2>
+                <div id="cvEdu" class="cv__empty"><strong>INSTITUIÇÃO</strong> — Graduação em Análise e Desenvolvimento de Sistemas · 2015 – 2018</div>
+              </section>
+              <section class="cv__section">
+                <h2>CERTIFICAÇÕES</h2>
+                <div id="cvCerts" class="cv__empty">ISTQB CTFL (BSTQB) · 2019 · <strong>COBIT 5 Foundation (ISACA)</strong> · 2021</div>
+              </section>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p>© <span id="yearSpan"></span> ATS Resume Builder · Open Source · Projeto independente compatível com scanners de IA recrutadoras.</p>
+      <a class="footer__repo" href="https://github.com/bioadsl/ats-builder" target="_blank" rel="noopener noreferrer">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+        </svg>
+        Repositório GitHub
+      </a>
+    </div>
+  </footer>
+
+  <button id="backToTop" class="back-to-top" aria-label="Voltar ao topo" title="Voltar ao topo">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <script src="script.js"></script>
+</body>
+</html>

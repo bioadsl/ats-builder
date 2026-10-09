@@ -18,7 +18,11 @@
   <meta name="twitter:title" content="ATS Resume Builder · Gerador Scanner Friendly" />
   <meta name="twitter:description" content="Import PDF LinkedIn + 100% compatível com Workday, Greenhouse, Taleo. Sem tabelas, sem imagens — só texto puro indexável." />
 
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%236366f1'/><text x='50' y='68' font-size='55' text-anchor='middle' font-family='Arial,sans-serif' font-weight='bold' fill='white'>Q</text></svg>" />
+  <link rel="icon" type="image/svg+xml" sizes="any" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%236366f1'/><stop offset='1' stop-color='%2306b6d4'/></linearGradient></defs><rect width='100' height='100' rx='22' fill='url(%23g)'/><text x='50' y='66' font-size='42' text-anchor='middle' font-family='Arial,Helvetica,sans-serif' font-weight='900' letter-spacing='1' fill='white'>QA</text></svg>" />
+  <link rel="alternate icon" type="image/svg+xml" sizes="16x16" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><defs><linearGradient id='g16' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%236366f1'/><stop offset='1' stop-color='%2306b6d4'/></linearGradient></defs><rect width='16' height='16' rx='3.5' fill='url(%23g16)'/><text x='8' y='11.5' font-size='7' text-anchor='middle' font-family='Arial,Helvetica,sans-serif' font-weight='900' letter-spacing='0.3' fill='white'>QA</text></svg>" />
+  <link rel="alternate icon" type="image/svg+xml" sizes="32x32" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g32' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%236366f1'/><stop offset='1' stop-color='%2306b6d4'/></linearGradient></defs><rect width='32' height='32' rx='7' fill='url(%23g32)'/><text x='16' y='22.5' font-size='14' text-anchor='middle' font-family='Arial,Helvetica,sans-serif' font-weight='900' letter-spacing='0.6' fill='white'>QA</text></svg>" />
+  <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><defs><linearGradient id='g180' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%236366f1'/><stop offset='1' stop-color='%2306b6d4'/></linearGradient></defs><rect width='180' height='180' rx='40' fill='url(%23g180)'/><text x='90' y='126' font-size='76' text-anchor='middle' font-family='Arial,Helvetica,sans-serif' font-weight='900' letter-spacing='3' fill='white'>QA</text></svg>" />
+  <meta name="theme-color" content="#6366f1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -42,7 +46,7 @@
   <header class="header">
     <nav class="nav container">
       <a href="#" class="nav__logo" aria-label="Ir para o início">
-        <span class="logo__icon">Q</span>
+        <span class="logo__icon" aria-label="QA">QA</span>
         <span class="logo__text">ATS Builder</span>
       </a>
       <ul class="nav__links" role="menubar">
@@ -75,7 +79,7 @@
   <main>
     <!-- ATS Resume Builder Section (standalone app) -->
     <section id="ats-builder" class="section section--alt">
-      <div class="container">
+      <div class="container container--ats-wide">
         <div class="section__header">
           <span class="section__eyebrow">💼 Ferramenta Profissional</span>
           <h2 class="section__title">ATS Resume Builder · Gerador & Scanner Friendly</h2>
@@ -83,29 +87,32 @@
         </div>
 
         <!-- ATS Validator Score Panel -->
-        <div class="ats-score" id="atsScore" role="region" aria-label="Validador ATS em tempo real">
+        <div class="ats-score" id="atsScore" role="region" aria-labelledby="atsScoreTitle">
+          <span class="sr-only" id="atsScoreTitle">Painel de pontuação e compatibilidade ATS com scanners de recrutamento</span>
           <div class="ats-score__left">
-            <div class="ats-score__ring">
-              <div class="ats-score__number" id="atsScoreValue">0</div>
-              <div class="ats-score__label">pts · Score ATS</div>
+            <div class="ats-score__ring" role="img" aria-labelledby="scoreNumLabel scorePtsLabel">
+              <div class="ats-score__number" id="atsScoreValue" aria-live="polite">0</div>
+              <div class="ats-score__label" id="scoreNumLabel">pontos</div>
+              <div class="ats-score__label" id="scorePtsLabel">de compatibilidade ATS</div>
             </div>
             <div class="ats-score__info">
-              <div class="ats-score__status" id="atsScoreStatus">Carregando análise...</div>
-              <div class="ats-score__desc" id="atsScoreDesc">Preencha o formulário ao lado para que nosso validador em tempo real analise a compatibilidade com scanners de IA.</div>
+              <div class="ats-score__status" id="atsScoreStatus" aria-live="polite">Carregando análise...</div>
+              <div class="ats-score__desc" id="atsScoreDesc">Preencha o formulário para que nosso validador em tempo real analise a compatibilidade com scanners de IA de recrutamento (Workday, Greenhouse, SuccessFactors e outros).</div>
             </div>
           </div>
           <div class="ats-score__actions">
-            <button class="btn btn--primary" id="atsPrintBtn" type="button" disabled>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            <button class="btn btn--primary" id="atsPrintBtn" type="button" disabled aria-describedby="printBtnHelp">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
               Exportar PDF ATS
             </button>
+            <span class="sr-only" id="printBtnHelp">Botão exportar currículo para PDF compatível com sistemas de rastreamento de candidatos</span>
             <label class="btn btn--outline btn--file-label" for="atsFileInput">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
               Importar PDF do LinkedIn
-              <input id="atsFileInput" type="file" accept="application/pdf,.pdf" hidden />
+              <input id="atsFileInput" type="file" accept="application/pdf,.pdf" aria-label="Selecionar arquivo PDF exportado do LinkedIn para importação automática" />
             </label>
-            <button class="btn btn--ghost" id="atsFillDemo" type="button">Auto-preencher demo</button>
-            <button class="btn btn--ghost" id="atsClearBtn" type="button">Limpar tudo</button>
+            <button class="btn btn--ghost" id="atsFillDemoBtn" type="button" title="Preencher formulário com exemplo de currículo">Auto-preencher demo</button>
+            <button class="btn btn--ghost" id="atsClearBtn" type="button" title="Limpar todos os campos do formulário">Limpar tudo</button>
           </div>
         </div>
 
@@ -177,91 +184,195 @@
         <div class="ats-wrapper">
           <!-- LEFT: Multi-step Form -->
           <div class="ats-form">
-            <div class="ats-form__stepper" role="tablist" id="atsStepper">
-              <button class="ats-step active" data-step="0" role="tab" aria-selected="true">1. Pessoal</button>
-              <button class="ats-step" data-step="1" role="tab">2. Resumo</button>
-              <button class="ats-step" data-step="2" role="tab">3. Habilidades</button>
-              <button class="ats-step" data-step="3" role="tab">4. Experiência</button>
-              <button class="ats-step" data-step="4" role="tab">5. Formação</button>
-              <button class="ats-step" data-step="5" role="tab">6. Certificações</button>
+            <div class="ats-form__stepper" role="tablist" id="atsStepper" aria-label="Passos do formulário de currículo">
+              <button class="ats-step active" data-step="0" role="tab" aria-selected="true" aria-controls="panel-step-0" id="tab-step-0">
+                <span class="ats-step__num" aria-hidden="true">1</span>
+                <span class="ats-step__txt">Pessoal</span>
+                <span class="sr-only">Passo 1 de 7, Dados Pessoais</span>
+              </button>
+              <button class="ats-step" data-step="1" role="tab" aria-selected="false" aria-controls="panel-step-1" id="tab-step-1" tabindex="-1">
+                <span class="ats-step__num" aria-hidden="true">2</span>
+                <span class="ats-step__txt">Resumo</span>
+                <span class="sr-only">Passo 2 de 7, Resumo Profissional</span>
+              </button>
+              <button class="ats-step" data-step="2" role="tab" aria-selected="false" aria-controls="panel-step-2" id="tab-step-2" tabindex="-1">
+                <span class="ats-step__num" aria-hidden="true">3</span>
+                <span class="ats-step__txt">Habilidades</span>
+                <span class="sr-only">Passo 3 de 7, Matriz de Habilidades</span>
+              </button>
+              <button class="ats-step" data-step="3" role="tab" aria-selected="false" aria-controls="panel-step-3" id="tab-step-3" tabindex="-1">
+                <span class="ats-step__num" aria-hidden="true">4</span>
+                <span class="ats-step__txt">Experiência</span>
+                <span class="sr-only">Passo 4 de 7, Experiência Profissional</span>
+              </button>
+              <button class="ats-step" data-step="4" role="tab" aria-selected="false" aria-controls="panel-step-4" id="tab-step-4" tabindex="-1">
+                <span class="ats-step__num" aria-hidden="true">5</span>
+                <span class="ats-step__txt">Formação</span>
+                <span class="sr-only">Passo 5 de 7, Formação Acadêmica</span>
+              </button>
+              <button class="ats-step" data-step="5" role="tab" aria-selected="false" aria-controls="panel-step-5" id="tab-step-5" tabindex="-1">
+                <span class="ats-step__num" aria-hidden="true">6</span>
+                <span class="ats-step__txt">Certificações</span>
+                <span class="sr-only">Passo 6 de 7, Certificações</span>
+              </button>
+              <button class="ats-step" data-step="6" role="tab" aria-selected="false" aria-controls="panel-step-6" id="tab-step-6" tabindex="-1">
+                <span class="ats-step__num" aria-hidden="true">7</span>
+                <span class="ats-step__txt">Idiomas</span>
+                <span class="sr-only">Passo 7 de 7, Idiomas e Proficiência</span>
+              </button>
             </div>
 
-            <form id="atsForm" class="ats-form__panel" autocomplete="on" novalidate>
-              <div class="ats-step__panel" data-step-panel="0">
-                <h3 class="ats-step__title">👤 Dados Pessoais</h3>
-                <p class="ats-step__hint">Evite abreviações no nome completo. Use endereço de cidade/estado — não precisa de CEP nem endereço residencial completo.</p>
+            <div class="ats-form__progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso geral do formulário">
+              <div class="ats-form__progress-bar" id="atsFormProgressBar" style="width: 17%;"></div>
+              <span class="ats-form__progress-txt" id="atsFormProgressTxt">17% concluído</span>
+            </div>
+
+            <form id="atsForm" class="ats-form__panel" autocomplete="on" novalidate aria-describedby="atsFormHelper">
+              <span class="sr-only" id="atsFormHelper">Formulário de currículo compatível com sistemas ATS. Campos com asterisco são de preenchimento obrigatório.</span>
+              <div class="ats-step__panel" data-step-panel="0" id="panel-step-0" role="tabpanel" aria-labelledby="tab-step-0">
+                <h3 class="ats-step__title"><span aria-hidden="true">[Pessoal] </span>Dados Pessoais</h3>
+                <p class="ats-step__hint">Evite abreviações no nome completo. Use endereço de cidade/estado — não precisa de CEP nem endereço residencial completo. DDD + 9 dígitos garante contato via WhatsApp.</p>
                 <div class="ats-form__grid">
-                  <label class="ats-field"><span>Nome completo *</span><input name="fullName" required placeholder="Fabrício Duarte da Silva" maxlength="80"></label>
-                  <label class="ats-field"><span>Cargo profissional *</span><input name="role" required placeholder="QA Automation Engineer / Senior Test Analyst" maxlength="70"></label>
-                  <label class="ats-field"><span>E-mail profissional *</span><input name="email" type="email" required placeholder="voce@email.com" maxlength="80"></label>
-                  <label class="ats-field"><span>Telefone / WhatsApp</span><input name="phone" placeholder="(61) 98426-0515" maxlength="25"></label>
-                  <label class="ats-field"><span>Localização (Cidade - UF)</span><input name="location" placeholder="Brasília - DF" maxlength="40"></label>
-                  <label class="ats-field"><span>LinkedIn (URL)</span><input name="linkedin" type="url" placeholder="https://linkedin.com/in/seu-perfil" maxlength="120"></label>
-                  <label class="ats-field ats-field--full"><span>GitHub / Portfólio (URL)</span><input name="portfolio" type="url" placeholder="https://github.com/bioadsl" maxlength="120"></label>
+                  <label class="ats-field" data-validate="fullName">
+                    <span>Nome completo <span aria-hidden="true" class="req-mark">*</span><span class="sr-only">obrigatório</span></span>
+                    <input name="fullName" required placeholder="Fabrício Duarte da Silva" maxlength="80" autocomplete="name" aria-required="true" aria-describedby="fullNameHelp fullNameError" />
+                    <small class="ats-field__help" id="fullNameHelp">Nome e sobrenome, sem abreviações.</small>
+                    <small class="ats-field__error" id="fullNameError" role="alert" aria-live="polite"></small>
+                  </label>
+                  <label class="ats-field" data-validate="role">
+                    <span>Cargo profissional <span aria-hidden="true" class="req-mark">*</span><span class="sr-only">obrigatório</span></span>
+                    <input name="role" required placeholder="QA Automation Engineer / Senior Test Analyst" maxlength="70" aria-required="true" aria-describedby="roleHelp roleError" />
+                    <small class="ats-field__help" id="roleHelp">Use títulos de mercado (ex: Senior QA, SDET).</small>
+                    <small class="ats-field__error" id="roleError" role="alert" aria-live="polite"></small>
+                  </label>
+                  <label class="ats-field" data-validate="email">
+                    <span>E-mail profissional <span aria-hidden="true" class="req-mark">*</span><span class="sr-only">obrigatório</span></span>
+                    <input name="email" type="email" required placeholder="voce@email.com" maxlength="80" autocomplete="email" aria-required="true" aria-describedby="emailHelp emailError" />
+                    <small class="ats-field__help" id="emailHelp">Prefira Gmail, Outlook ou domínio próprio.</small>
+                    <small class="ats-field__error" id="emailError" role="alert" aria-live="polite"></small>
+                  </label>
+                  <label class="ats-field" data-validate="phone">
+                    <span>Telefone / WhatsApp</span>
+                    <input name="phone" id="phoneInput" placeholder="61 98765-4321" maxlength="20" autocomplete="tel" inputmode="tel" aria-describedby="phoneHelp phoneError" />
+                    <small class="ats-field__help" id="phoneHelp">Formato: DDD + 9 dígitos. Será incluído no cabeçalho do currículo.</small>
+                    <small class="ats-field__error" id="phoneError" role="alert" aria-live="polite"></small>
+                  </label>
+                  <label class="ats-field" data-validate="location">
+                    <span>Localização (Cidade - UF)</span>
+                    <input name="location" placeholder="Brasília - DF" maxlength="40" autocomplete="address-level2" aria-describedby="locationHelp" />
+                    <small class="ats-field__help" id="locationHelp">ATS usam localização para matching regional.</small>
+                  </label>
+                  <label class="ats-field" data-validate="linkedin">
+                    <span>LinkedIn (URL)</span>
+                    <input name="linkedin" type="url" placeholder="https://linkedin.com/in/seu-perfil" maxlength="120" autocomplete="url" aria-describedby="linkedinHelp linkedinError" />
+                    <small class="ats-field__help" id="linkedinHelp">Formato: linkedin.com/in/nome-sobrenome.</small>
+                    <small class="ats-field__error" id="linkedinError" role="alert" aria-live="polite"></small>
+                  </label>
+                  <label class="ats-field ats-field--full" data-validate="portfolio">
+                    <span>GitHub / Portfólio (URL)</span>
+                    <input name="portfolio" type="url" placeholder="https://github.com/bioadsl" maxlength="120" autocomplete="url" aria-describedby="portfolioHelp portfolioError" />
+                    <small class="ats-field__help" id="portfolioHelp">Repositórios, trabalhos publicados ou portfólio online.</small>
+                    <small class="ats-field__error" id="portfolioError" role="alert" aria-live="polite"></small>
+                  </label>
                 </div>
               </div>
 
-              <div class="ats-step__panel" data-step-panel="1" hidden>
-                <h3 class="ats-step__title">📝 Resumo Profissional / Executive Summary</h3>
-                <p class="ats-step__hint">Escreva 3–5 frases de alto impacto. Palavras-chave de cargo e setores (QA, Automação, Selenium, DevOps, Financeiro, Telecom) garantem match com os scanners de IA.</p>
-                <label class="ats-field ats-field--full"><span>Resumo profissional *</span>
-                  <textarea name="summary" required rows="7" maxlength="750" placeholder="Analista de Testes Sênior / QA Automation Engineer com X anos de experiência em automação de testes Web/Mobile, validação de APIs REST e cultura Shift-Left em projetos de missão crítica dos setores financeiro e de segurança pública..."></textarea>
+              <div class="ats-step__panel" data-step-panel="1" id="panel-step-1" role="tabpanel" aria-labelledby="tab-step-1" hidden>
+                <h3 class="ats-step__title"><span aria-hidden="true">[Resumo] </span>Resumo Profissional / Executive Summary</h3>
+                <p class="ats-step__hint">Escreva 3 a 5 frases de alto impacto. Inclua palavras-chave do anúncio (QA, Automação, Selenium, DevOps, Financeiro, Telecom) para garantir match com scanners de IA.</p>
+                <label class="ats-field ats-field--full" data-validate="summary">
+                  <span>Resumo profissional <span aria-hidden="true" class="req-mark">*</span><span class="sr-only">obrigatório</span></span>
+                  <textarea name="summary" required rows="7" maxlength="750" placeholder="Analista de Testes Sênior / QA Automation Engineer com X anos de experiência em automação de testes Web/Mobile, validação de APIs REST e cultura Shift-Left em projetos de missão crítica dos setores financeiro e de segurança pública..." aria-required="true" aria-describedby="summaryHelp summaryError"></textarea>
+                  <small class="ats-field__help" id="summaryHelp">Mínimo 250 caracteres para ranqueamento ideal. Estrutura: anos + stack + setor + 2 impactos.</small>
+                  <small class="ats-field__error" id="summaryError" role="alert" aria-live="polite"></small>
                 </label>
-                <small class="ats-counter"><span id="summaryCount">0</span>/750 caracteres</small>
+                <div class="ats-counter-wrap">
+                  <small class="ats-counter"><span id="summaryCount">0</span>/750 caracteres · Ideal: acima de 250.</small>
+                  <div class="ats-counter-bar" aria-hidden="true"><div id="summaryBar" style="width:0%"></div></div>
+                </div>
               </div>
 
-              <div class="ats-step__panel" data-step-panel="2" hidden>
-                <h3 class="ats-step__title">🧩 Matriz de Habilidades</h3>
-                <p class="ats-step__hint">Separe as competências por vírgula. Quanto mais palavras-chave do anúncio de vaga aqui, maior a pontuação ATS (ex: Selenium, Cypress, Postman, Java, Python, SQL, Scrum, CI/CD).</p>
-                <label class="ats-field ats-field--full"><span>Linguagens & Tecnologias *</span>
-                  <textarea name="skills" required rows="3" maxlength="600" placeholder="Java, Python, JavaScript, Ruby, SQL, COBOL, HTML, CSS, TypeScript"></textarea>
+              <div class="ats-step__panel" data-step-panel="2" id="panel-step-2" role="tabpanel" aria-labelledby="tab-step-2" hidden>
+                <h3 class="ats-step__title"><span aria-hidden="true">[Habilidades] </span>Matriz de Habilidades</h3>
+                <p class="ats-step__hint">Separe por vírgula. Copie palavras-chave diretamente do anúncio da vaga: quanto mais match, maior a pontuação ATS (ex: Selenium, Cypress, Postman, Java, Python, SQL, Scrum, CI/CD).</p>
+                <label class="ats-field ats-field--full" data-validate="skills">
+                  <span>Linguagens &amp; Tecnologias <span aria-hidden="true" class="req-mark">*</span><span class="sr-only">obrigatório</span></span>
+                  <textarea name="skills" required rows="3" maxlength="600" placeholder="Java, Python, JavaScript, Ruby, SQL, COBOL, HTML, CSS, TypeScript" aria-required="true" data-validate="skills" aria-describedby="skillsHelp skillsError" autocomplete="off"></textarea>
+                  <small class="ats-field__help" id="skillsHelp">Separe por vírgula. Copie palavras-chave diretamente do anúncio da vaga. Ex: Java, Python, SQL, HTML, CSS, TypeScript.</small>
+                  <small class="ats-field__error" id="skillsError" role="alert" aria-live="polite"></small>
                 </label>
-                <label class="ats-field ats-field--full"><span>Frameworks de Automação</span>
-                  <textarea name="frameworks" rows="3" maxlength="600" placeholder="Selenium WebDriver, Cypress, Playwright, Katalon Studio, Robot Framework, Cucumber, JUnit, Behave, Capybara, RestAssured"></textarea>
+                <label class="ats-field ats-field--full">
+                  <span>Frameworks de Automação</span>
+                  <textarea name="frameworks" rows="3" maxlength="600" placeholder="Selenium WebDriver, Cypress, Playwright, Katalon Studio, Robot Framework, Cucumber, JUnit, Behave, Capybara, RestAssured" autocomplete="off"></textarea>
                 </label>
-                <label class="ats-field ats-field--full"><span>Ferramentas & Metodologias</span>
-                  <textarea name="tools" rows="3" maxlength="600" placeholder="Postman, Newman, Swagger, JMeter, Jenkins, Git, Jira, TestLink, QASE, SonarQube, AWS, Scrum, Kanban, Shift-Left, ISTQB"></textarea>
+                <label class="ats-field ats-field--full">
+                  <span>Ferramentas &amp; Metodologias</span>
+                  <textarea name="tools" rows="3" maxlength="600" placeholder="Postman, Newman, Swagger, JMeter, Jenkins, Git, Jira, TestLink, QASE, SonarQube, AWS, Scrum, Kanban, Shift-Left, ISTQB" autocomplete="off"></textarea>
+                </label>
+                <label class="ats-field ats-field--full" data-validate="softskills">
+                  <span>Soft Skills (Comportamentais)</span>
+                  <textarea name="softskills" rows="3" maxlength="500" placeholder="Liderança Técnica, Atenção aos Detalhes, Comunicação Clara, Pensamento Crítico, Resolução de Problemas, Proatividade, Organização, Trabalho em Equipe" aria-describedby="softHelp softError" autocomplete="off"></textarea>
+                  <small class="ats-field__help" id="softHelp">Vagas sênior: destaque liderança, comunicação, gestão de conflitos, adaptabilidade. ATS buscam por aderência cultural.</small>
+                  <small class="ats-field__error" id="softError" role="alert" aria-live="polite"></small>
                 </label>
               </div>
 
-              <div class="ats-step__panel" data-step-panel="3" hidden>
+              <div class="ats-step__panel" data-step-panel="3" id="panel-step-3" role="tabpanel" aria-labelledby="tab-step-3" hidden>
                 <div class="ats-step__header-row">
-                  <h3 class="ats-step__title">💼 Experiência Profissional</h3>
-                  <button class="btn btn--ghost btn--sm" type="button" id="atsAddExpBtn">+ Adicionar cargo</button>
+                  <h3 class="ats-step__title"><span aria-hidden="true">[Experiência] </span>Experiência Profissional</h3>
+                  <button class="btn btn--ghost btn--sm" type="button" id="atsAddExpBtn" aria-label="Adicionar novo cargo de experiência profissional">+ Adicionar cargo</button>
                 </div>
-                <p class="ats-step__hint">Mínimo recomendado: <strong>3 cargos recentes</strong>. Use verbos no passado (implementei, liderei, reduzi, otimizei) e números (%, R$, QTD) para cada conquista — IA recrutadoras adoram impacto mensurável.</p>
-                <div id="atsExpList"></div>
+                <p class="ats-step__hint">Mínimo recomendado: <strong>3 cargos recentes</strong>. Use verbos no passado (implementei, liderei, reduzi, otimizei) e números (%, R$, QTD) para cada conquista — IA recrutadoras priorizam impacto mensurável.</p>
+                <div id="atsExpList" aria-live="polite"></div>
               </div>
 
-              <div class="ats-step__panel" data-step-panel="4" hidden>
+              <div class="ats-step__panel" data-step-panel="4" id="panel-step-4" role="tabpanel" aria-labelledby="tab-step-4" hidden>
                 <div class="ats-step__header-row">
-                  <h3 class="ats-step__title">🎓 Formação Acadêmica</h3>
-                  <button class="btn btn--ghost btn--sm" type="button" id="atsAddEduBtn">+ Adicionar curso</button>
+                  <h3 class="ats-step__title"><span aria-hidden="true">[Formação] </span>Formação Acadêmica</h3>
+                  <button class="btn btn--ghost btn--sm" type="button" id="atsAddEduBtn" aria-label="Adicionar novo curso ou formação acadêmica">+ Adicionar curso</button>
                 </div>
-                <div id="atsEduList"></div>
+                <p class="ats-step__hint">Sistemas Workday validam formação mínima para o cargo. Inclua graduação e cursos complementares relevantes.</p>
+                <div id="atsEduList" aria-live="polite"></div>
               </div>
 
-              <div class="ats-step__panel" data-step-panel="5" hidden>
+              <div class="ats-step__panel" data-step-panel="5" id="panel-step-5" role="tabpanel" aria-labelledby="tab-step-5" hidden>
                 <div class="ats-step__header-row">
-                  <h3 class="ats-step__title">🏆 Certificações e Cursos</h3>
-                  <button class="btn btn--ghost btn--sm" type="button" id="atsAddCertBtn">+ Adicionar certificação</button>
+                  <h3 class="ats-step__title"><span aria-hidden="true">[Certificações] </span>Certificações e Cursos</h3>
+                  <button class="btn btn--ghost btn--sm" type="button" id="atsAddCertBtn" aria-label="Adicionar nova certificação">+ Adicionar certificação</button>
                 </div>
-                <div id="atsCertList"></div>
+                <p class="ats-step__hint">Certificações diferenciam seu perfil em vagas sênior. Destaque: ISTQB, AWS, Scrum, Cypress, Selenium, COBIT, ITIL.</p>
+                <div id="atsCertList" aria-live="polite"></div>
               </div>
 
-              <div class="ats-form__nav">
-                <button type="button" class="btn btn--ghost" id="atsPrevBtn" disabled>← Anterior</button>
-                <button type="button" class="btn btn--primary" id="atsNextBtn">Próximo →</button>
+              <div class="ats-step__panel" data-step-panel="6" id="panel-step-6" role="tabpanel" aria-labelledby="tab-step-6" hidden>
+                <div class="ats-step__header-row">
+                  <h3 class="ats-step__title"><span aria-hidden="true">[Idiomas] </span>Idiomas e Proficiência</h3>
+                  <button class="btn btn--ghost btn--sm" type="button" id="atsAddLangBtn" aria-label="Adicionar novo idioma">+ Adicionar idioma</button>
+                </div>
+                <p class="ats-step__hint">Sistemas ATS validam idiomas para vagas globais e multinacionais. Use o <strong>MCER / CEFR</strong> (A1, A2, B1, B2, C1, C2) para padronização internacional. Inclua certificações (TOEFL, IELTS, Cambridge, DELE, JLPT) para comprovação.</p>
+                <div id="atsLangList" aria-live="polite"></div>
               </div>
+
+              <div class="ats-form__nav" role="navigation" aria-label="Navegação entre passos">
+                <button type="button" class="btn btn--ghost" id="atsPrevBtn" disabled aria-label="Voltar para passo anterior">← Anterior</button>
+                <button type="button" class="btn btn--primary" id="atsNextBtn" aria-describedby="nextBtnHint">Próximo →</button>
+                <span class="sr-only" id="nextBtnHint">Avançar para o próximo passo do formulário. Será validado o preenchimento do passo atual.</span>
+              </div>
+              <div class="ats-form__step-errors" id="atsStepErrors" role="alert" aria-live="assertive" hidden></div>
             </form>
           </div>
 
           <!-- RIGHT: Live ATS-friendly Preview -->
-          <aside class="ats-preview" aria-label="Prévia do currículo compatível ATS">
+          <aside class="ats-preview" aria-label="Prévia em tempo real do currículo compatível com ATS" id="atsPreviewSide">
             <div class="ats-preview__toolbar">
-              <span class="ats-preview__tag">📄 Prévia ATS · Modo texto-indexável</span>
+              <span class="ats-preview__tag" aria-hidden="true">[PDF] </span>
+              <span><strong>Prévia ATS</strong> · Modo texto-indexável · 100% legível por scanners</span>
+              <button type="button" class="ats-preview__pin" id="atsPreviewPinBtn" aria-pressed="true" title="Fixar prévia durante rolagem" aria-label="Fixar ou desafixar painel da prévia">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5"></path><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"></path></svg>
+              </button>
             </div>
-            <div class="ats-preview__paper" id="atsPreviewPaper" data-role="cv-exportable">
+            <div class="sr-only" id="cvAltText" aria-live="polite"></div>
+            <div class="ats-preview__paper" id="atsPreviewPaper" data-role="cv-exportable" role="document" aria-label="Conteúdo do currículo em formato de visualização. Ao exportar, este conteúdo se torna texto puro indexável." aria-describedby="cvAltText">
               <header class="cv__header">
                 <h1 class="cv__name" id="cvName">NOME COMPLETO</h1>
                 <p class="cv__role" id="cvRole">Cargo Profissional</p>
@@ -272,20 +383,40 @@
                 <p id="cvSummary" class="cv__empty">Seu resumo executivo aparecerá aqui. Mínimo recomendado: 250 caracteres com palavras-chave relevantes.</p>
               </section>
               <section class="cv__section">
-                <h2>HABILIDADES</h2>
-                <div id="cvSkills" class="cv__empty">Java · Python · SQL · JavaScript · Selenium · Postman · Cypress · Jenkins · Jira · Scrum</div>
+                <h2>PRINCIPAIS COMPETÊNCIAS</h2>
+                <div id="cvSkills" class="cv__empty">
+                  <p><strong>Hard Skills:</strong> Java, Python, JavaScript, Ruby, SQL, COBOL, TypeScript, HTML, CSS, CI/CD.</p>
+                  <p><strong>Linguagens &amp; Tecnologias:</strong> Java, Python, JavaScript, Ruby, SQL, COBOL, TypeScript, HTML, CSS, CI/CD.</p>
+                  <p><strong>Frameworks de Automação e Ferramentas:</strong> Selenium WebDriver, Cypress, Playwright, Katalon Studio, Robot Framework, Cucumber, JUnit, Behave, Capybara, RestAssured.</p>
+                  <p><strong>Metodologias:</strong> Postman, Newman, Apidog, Swagger/OpenAPI, SoapUI, JMeter, Jenkins, Git, GitHub, GitLab CI, Jira, Redmine, TestLink, QASE, IBM RQM, Zephir, SonarQube, AWS, Docker, Scrum, Kanban, Shift-Left, ISTQB, Graylog, Mainframe, LeanFT, HTML Reports.</p>
+                  <p><strong>Soft Skills:</strong> Liderança Técnica, Capacidade Analítica, Atenção aos Detalhes, Comunicação Clara, Proatividade, Organização, Pensamento Crítico, Resolução de Problemas, Trabalho em Equipe, Adaptabilidade, Colaboração.</p>
+                </div>
               </section>
               <section class="cv__section">
                 <h2>EXPERIÊNCIA PROFISSIONAL</h2>
-                <div id="cvExp" class="cv__empty">Exemplo:<br><strong>EMPRESA</strong> — Cargo · Jan/2023 – Atual · Cidade - UF<br>• Implementei framework de automação reduzindo tempo de regressão em 60%.<br>• Liderava equipe de 3 QAs e integração CI/CD.</div>
+                <div id="cvExp" class="cv__empty">
+                  <div class="cv-exp__job">
+                    <p class="cv-exp__company">Meta</p>
+                    <p class="cv-exp__position">Analista de Qualidade de Software III (Sênior)</p>
+                    <p class="cv-exp__period">Dezembro de 2025 – Atual</p>
+                    <ul class="cv-exp__bullets">
+                      <li>Otimizei a estabilidade e a confiabilidade de plataformas globais conectando bilhões de usuários, por meio de automação de testes em alta performance.</li>
+                      <li>Garanti a integridade de contratos e regras de negócio em arquiteturas de microsserviços escaláveis, com validações rigorosas de APIs REST.</li>
+                    </ul>
+                  </div>
+                </div>
               </section>
               <section class="cv__section">
                 <h2>FORMAÇÃO ACADÊMICA</h2>
-                <div id="cvEdu" class="cv__empty"><strong>INSTITUIÇÃO</strong> — Graduação em Análise e Desenvolvimento de Sistemas · 2015 – 2018</div>
+                <div id="cvEdu" class="cv__empty"><p><strong>Graduação em Análise e Desenvolvimento de Sistemas</strong> | Instituto Superior Fátima (ISF) – Concluído.</p><p><strong>Extensões e Cursos Técnicos:</strong> Administrador de Redes Linux (Sistemas Abertos); Redes de Computadores e Infraestrutura (Escola Técnica de Brasília); Web Design e Mídias Digitais (Bit Company).</p></div>
               </section>
               <section class="cv__section">
-                <h2>CERTIFICAÇÕES</h2>
-                <div id="cvCerts" class="cv__empty">ISTQB CTFL (BSTQB) · 2019 · <strong>COBIT 5 Foundation (ISACA)</strong> · 2021</div>
+                <h2>CERTIFICAÇÕES PROFISSIONAIS</h2>
+                <div id="cvCerts" class="cv__empty"><p><strong>ISTQB CTFL</strong> – Certified Tester Foundation Level (BSTQB / International Software Testing Qualifications Board).</p><p><strong>COBIT 5 Foundation.</strong></p><p><strong>Formações Técnicas Adicionais:</strong> Automação Web Avançada com Python, Selenium e Behave; Automação Multistack com Capybara, Cucumber e Ruby; Treinamento e Governança em LGPD.</p></div>
+              </section>
+              <section class="cv__section">
+                <h2>IDIOMAS</h2>
+                <div id="cvLangs" class="cv__empty">Português — Nativo · Inglês — Intermediário / B2 · Espanhol — Básico / A2</div>
               </section>
             </div>
           </aside>

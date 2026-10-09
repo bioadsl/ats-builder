@@ -439,13 +439,15 @@
     const addExpBtn = document.getElementById('atsAddExpBtn');
     const addEduBtn = document.getElementById('atsAddEduBtn');
     const addCertBtn = document.getElementById('atsAddCertBtn');
+    const addLangBtn = document.getElementById('atsAddLangBtn');
     const summaryCount = document.getElementById('summaryCount');
 
     const elsAts = {
       list: {
         exp: document.getElementById('atsExpList'),
         edu: document.getElementById('atsEduList'),
-        cert: document.getElementById('atsCertList')
+        cert: document.getElementById('atsCertList'),
+        lang: document.getElementById('atsLangList')
       },
       preview: {
         name: document.getElementById('cvName'),
@@ -455,7 +457,8 @@
         skills: document.getElementById('cvSkills'),
         exp: document.getElementById('cvExp'),
         edu: document.getElementById('cvEdu'),
-        cert: document.getElementById('cvCerts')
+        cert: document.getElementById('cvCerts'),
+        lang: document.getElementById('cvLangs')
       },
       score: {
         value: document.getElementById('atsScoreValue'),
@@ -472,7 +475,8 @@
       form: {},
       exp: [],
       edu: [],
-      cert: []
+      cert: [],
+      lang: []
     };
 
     // --------- Helpers ---------
@@ -506,6 +510,334 @@
 
     function countChars(s) { return (s || '').length; }
 
+    // --------- Input Masks ---------
+    function applyPhoneMask(value) {
+      var digits = String(value || '').replace(/\D+/g, '').slice(0, 11);
+      if (digits.length <= 2) return digits;
+      if (digits.length <= 6) return digits.slice(0, 2) + ' ' + digits.slice(2);
+      if (digits.length <= 10) return digits.slice(0, 2) + ' ' + digits.slice(2, 6) + '-' + digits.slice(6);
+      return digits.slice(0, 2) + ' ' + digits.slice(2, 7) + '-' + digits.slice(7);
+    }
+
+    function initPhoneMask() {
+      var phone = form.querySelector('[name="phone"]');
+      if (!phone) return;
+      phone.addEventListener('input', function () { phone.value = applyPhoneMask(phone.value); });
+    }
+
+    // --------- Field Validation ---------
+    var VALIDATORS = {
+      fullName: function (v) {
+        if (!v || !v.trim()) return { ok: false, msg: 'Informe seu nome completo.' };
+        var parts = v.trim().split(/\s+/);
+        if (parts.length < 2) return { ok: false, msg: 'Informe nome e sobrenome (mínimo 2 palavras).' };
+        if (v.trim().length < 6) return { ok: false, msg: 'Nome muito curto. Use o nome completo.' };
+        return { ok: true, msg: 'Nome completo válido.' };
+      },
+      role: function (v) {
+        if (!v || !v.trim()) return { ok: false, msg: 'Informe o cargo profissional desejado.' };
+        if (countChars(v) < 15) return { ok: false, msg: 'Descreva o cargo com mais detalhes (ex: Senior QA Automation Engineer).' };
+        return { ok: true, msg: 'Cargo bem descrito.' };
+      },
+      email: function (v) {
+        if (!v || !v.trim()) return { ok: false, msg: 'Informe seu e-mail profissional.' };
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) return { ok: false, msg: 'Formato de e-mail inválido (ex: voce@email.com).' };
+        if (/(hotmail|ig\.com\.br|yahoo|bol\.com\.br)/i.test(v)) return { ok: true, msg: 'E-mail válido. Considere Gmail/Outlook para perfil mais profissional.', warn: true };
+        return { ok: true, msg: 'E-mail profissional válido.' };
+      },
+      phone: function (v) {
+        var digits = String(v || '').replace(/\D+/g, '');
+        if (!digits) return { ok: true, msg: 'Telefone opcional, mas recomendado para contato.', warn: true };
+        if (digits.length < 10) return { ok: false, msg: 'Informe DDD + número (mínimo 10 dígitos).' };
+        if (digits.length < 11) return { ok: true, msg: 'Telefone fixo detectado. Celular com 9º dígito é preferível.', warn: true };
+        return { ok: true, msg: 'Telefone / WhatsApp completo.' };
+      },
+      location: function (v) {
+        if (!v || !v.trim()) return { ok: true, msg: 'Localização opcional. ATS usam para matching regional.', warn: true };
+        if (!/[A-Z]{2}/.test(v) && !/-\s*[A-Z]{2}$/.test(v)) return { ok: true, msg: 'Considere informar UF (ex: Brasília - DF).', warn: true };
+        return { ok: true, msg: 'Localização registrada.' };
+      },
+      linkedin: function (v) {
+        if (!v || !v.trim()) return { ok: true, msg: 'LinkedIn opcional, mas altamente recomendado.', warn: true };
+        if (!/^https?:\/\//i.test(v)) return { ok: false, msg: 'URL deve começar com https://' };
+        if (!/linkedin\.com\/in\/[^/\s]+/i.test(v)) return { ok: false, msg: 'Use o formato: https://linkedin.com/in/seu-nome' };
+        return { ok: true, msg: 'URL do LinkedIn válida.' };
+      },
+      portfolio: function (v) {
+        if (!v || !v.trim()) return { ok: true, msg: 'Portfólio / GitHub opcional. Diferencia o perfil.', warn: true };
+        if (!/^https?:\/\//i.test(v)) return { ok: false, msg: 'URL deve começar com https://' };
+        return { ok: true, msg: 'URL de portfólio válida.' };
+      },
+      summary: function (v) {
+        if (!v || !v.trim()) return { ok: false, msg: 'Escreva um resumo executivo (mínimo 250 caracteres recomendado).' };
+        if (countChars(v) < 150) return { ok: false, msg: 'Resumo muito curto. Adicione mais detalhes de impacto e stack.' };
+        if (countChars(v) < 250) return { ok: true, msg: 'Resumo razoável. Tente alcançar 250+ caracteres para maior rankeamento ATS.', warn: true };
+        if (countChars(v) > 650) return { ok: true, msg: 'Resumo longo. Considere manter entre 250 e 650 caracteres.', warn: true };
+        return { ok: true, msg: 'Resumo executivo dentro do tamanho ideal.' };
+      },
+      skills: function (v) {
+        if (!v || !v.trim()) return { ok: false, msg: 'Informe ao menos 5 linguagens / tecnologias.' };
+        if (countChars(v) < 30) return { ok: false, msg: 'Liste mais tecnologias. ATS ranqueiam por frequência de keywords.' };
+        if (countChars(v) < 80) return { ok: true, msg: 'Bom início. Adicione mais keywords relevantes do anúncio.', warn: true };
+        return { ok: true, msg: 'Matriz de habilidades bem detalhada.' };
+      },
+      softskills: function (v) {
+        if (!v || !v.trim()) return { ok: true, msg: 'Soft Skills são opcionais, mas recomendados para aderência cultural.', warn: true };
+        if (countChars(v) < 40) return { ok: true, msg: 'Poucas Soft Skills listadas. Adicione: Liderança, Comunicação, Organização etc.', warn: true };
+        return { ok: true, msg: 'Soft Skills listadas — diferencial para match cultural.' };
+      }
+    };
+
+    function setFieldState(fieldName, result) {
+      var label = form.querySelector('[data-validate="' + fieldName + '"]');
+      if (!label) return;
+      label.classList.remove('is-valid', 'is-invalid', 'is-warn', 'is-touched');
+      if (result) {
+        label.classList.add('is-touched');
+        if (result.ok && result.warn) label.classList.add('is-warn');
+        else if (result.ok) label.classList.add('is-valid');
+        else label.classList.add('is-invalid');
+      }
+      var errId = fieldName + 'Error';
+      var errEl = document.getElementById(errId);
+      if (errEl && result) {
+        errEl.textContent = result.ok ? '' : (result.msg || '');
+        errEl.hidden = result.ok;
+      }
+    }
+
+    function validateFieldByName(fieldName, value) {
+      var fn = VALIDATORS[fieldName];
+      if (!fn) return null;
+      var res = fn(value || '');
+      setFieldState(fieldName, res);
+      return res;
+    }
+
+    function validateCurrentStep() {
+      var stepIdx = state.currentStep;
+      var fieldsByStep = {
+        0: ['fullName', 'role', 'email', 'phone', 'location', 'linkedin', 'portfolio'],
+        1: ['summary'],
+        2: ['skills']
+      };
+      var required = fieldsByStep[stepIdx] || [];
+      var errors = [];
+      required.forEach(function (fname) {
+        var inp = form.querySelector('[name="' + fname + '"]');
+        var val = inp ? inp.value : '';
+        var r = validateFieldByName(fname, val);
+        if (r && !r.ok) errors.push({ field: fname, msg: r.msg });
+      });
+      return errors;
+    }
+
+    function showStepErrors(errors) {
+      var el = document.getElementById('atsStepErrors');
+      if (!el) return;
+      if (!errors.length) { el.hidden = true; el.innerHTML = ''; return; }
+      el.hidden = false;
+      el.innerHTML = '<strong>Verifique o passo atual:</strong><ul>' +
+        errors.map(function (e) { return '<li>' + escapeHtml(e.msg) + '</li>'; }).join('') +
+        '</ul>';
+    }
+
+    // --------- Progress Bar ---------
+    function calcOverallProgress() {
+      var data = collectData(true);
+      var validLang = (data.lang || []).filter(function (l) { return l.name && l.level; }).length;
+      var validSoftCount = String(data.form.softskills || '').split(/[,;\n]+/).map(function (s) { return s.trim(); }).filter(Boolean).length;
+      var checks = [
+        !!(data.form.fullName && VALIDATORS.fullName(data.form.fullName).ok),
+        !!(data.form.role && VALIDATORS.role(data.form.role).ok),
+        !!(data.form.email && VALIDATORS.email(data.form.email).ok),
+        !!(data.form.summary && countChars(data.form.summary) >= 250),
+        !!(data.form.skills && countChars(data.form.skills) >= 80),
+        !!(data.form.softskills && validSoftCount >= 5),
+        (data.exp || []).filter(function (e) { return e.company && e.role; }).length >= 2,
+        (data.edu || []).some(function (e) { return e.institution && e.course; }),
+        (data.cert || []).some(function (c) { return c.name; }),
+        validLang >= 1
+      ];
+      var done = checks.filter(Boolean).length;
+      return Math.round((done / checks.length) * 100);
+    }
+
+    function updateProgressBar() {
+      var pct = calcOverallProgress();
+      var bar = document.getElementById('atsFormProgressBar');
+      var txt = document.getElementById('atsFormProgressTxt');
+      var wrap = document.querySelector('.ats-form__progress');
+      if (bar) bar.style.width = String(pct) + '%';
+      if (txt) txt.textContent = String(pct) + '% concluído';
+      if (wrap) wrap.setAttribute('aria-valuenow', String(pct));
+    }
+
+    // --------- CV Alt Text (screen readers / text-indexable snapshot) ---------
+    function buildCvAltText(data) {
+      var f = data.form || {};
+      var lines = [];
+      lines.push('CURRÍCULO ATS (100% legível por scanners). Nome: ' + (f.fullName || 'não informado') + '. Cargo alvo: ' + (f.role || 'não informado') + '.');
+      var locationRaw = f.location || '';
+      var loc = locationRaw && /(distrito federal|df|brasilia)/i.test(locationRaw) ? 'Distrito Federal, Brasil' : (locationRaw ? locationRaw + ', Brasil' : '');
+      var contactParts = [loc];
+      if (f.email) contactParts.push('E-mail: ' + f.email);
+      if (f.linkedin) {
+        var li = String(f.linkedin).trim();
+        if (!/^https?:\/\//i.test(li)) li = 'https://' + li.replace(/^\/+/, '');
+        contactParts.push('LinkedIn: ' + li);
+      }
+      if (f.portfolio) {
+        var po = String(f.portfolio).trim();
+        if (!/^https?:\/\//i.test(po)) po = 'https://' + po.replace(/^\/+/, '');
+        contactParts.push((/github\.com/i.test(po) ? 'GitHub: ' : 'Portfólio: ') + po);
+      }
+      if (f.phone) contactParts.push('Telefone: ' + f.phone);
+      contactParts = contactParts.filter(Boolean);
+      if (contactParts.length) lines.push('Contato: ' + contactParts.join(' · ') + '.');
+      if (f.summary) lines.push('RESUMO PROFISSIONAL. ' + f.summary.replace(/\s+/g, ' ').replace(/\.?$/, '.'));
+      lines.push('PRINCIPAIS COMPETÊNCIAS:');
+      var splitClean = function (raw) {
+        if (!raw) return [];
+        return String(raw).split(/[,;\n]+/).map(function (s) {
+          return s.replace(/^\s*[-•*\d\.\)\s]+/, '').replace(/\s*\.\s*$/, '').trim();
+        }).filter(Boolean);
+      };
+      var dedupN = function (arr) {
+        var seen = new Set(); var out = [];
+        for (var k = 0; k < arr.length; k++) {
+          var it = arr[k];
+          var key = String(it || '').toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '');
+          if (!key || seen.has(key)) continue;
+          seen.add(key); out.push(it);
+        }
+        return out;
+      };
+      var hardDefaults = {
+        linguagens: ['Java', 'Python', 'JavaScript', 'Ruby', 'SQL', 'COBOL', 'TypeScript', 'HTML', 'CSS', 'CI/CD'],
+        frameworks: ['Selenium WebDriver', 'Cypress', 'Playwright', 'Katalon Studio', 'Robot Framework', 'Cucumber', 'JUnit', 'Behave', 'Capybara', 'RestAssured'],
+        metodologias: ['Postman', 'Newman', 'Apidog', 'Swagger/OpenAPI', 'SoapUI', 'JMeter', 'Jenkins', 'Git', 'GitHub', 'GitLab CI', 'Jira', 'Redmine', 'TestLink', 'QASE', 'IBM RQM', 'Zephir', 'SonarQube', 'AWS', 'Docker', 'Scrum', 'Kanban', 'Shift-Left', 'ISTQB', 'Graylog', 'Mainframe', 'LeanFT', 'HTML Reports'],
+        soft: ['Liderança Técnica', 'Capacidade Analítica', 'Atenção aos Detalhes', 'Comunicação Clara', 'Proatividade', 'Organização', 'Pensamento Crítico', 'Resolução de Problemas', 'Trabalho em Equipe', 'Adaptabilidade', 'Colaboração']
+      };
+      var linguagensArr = dedupN(splitClean(f.skills));
+      var frameworksArr = dedupN(splitClean(f.frameworks));
+      var metodologiasArr = dedupN(splitClean(f.tools));
+      var softArr = dedupN(splitClean(f.softskills));
+      if (linguagensArr.length + frameworksArr.length + metodologiasArr.length + softArr.length === 0) {
+        linguagensArr = hardDefaults.linguagens.slice();
+        frameworksArr = hardDefaults.frameworks.slice();
+        metodologiasArr = hardDefaults.metodologias.slice();
+        softArr = hardDefaults.soft.slice();
+      }
+      if (!linguagensArr.length) linguagensArr = hardDefaults.linguagens.slice();
+      if (!frameworksArr.length) frameworksArr = hardDefaults.frameworks.slice();
+      if (!metodologiasArr.length) metodologiasArr = hardDefaults.metodologias.slice();
+      if (!softArr.length) softArr = hardDefaults.soft.slice();
+
+      var hardAll = dedupN(linguagensArr.concat(frameworksArr).concat(metodologiasArr));
+
+      lines.push('Hard Skills: ' + hardAll.join(', ') + '.');
+      lines.push('Linguagens & Tecnologias: ' + linguagensArr.join(', ') + '.');
+      lines.push('Frameworks de Automação e Ferramentas: ' + frameworksArr.join(', ') + '.');
+      lines.push('Metodologias: ' + metodologiasArr.join(', ') + '.');
+      lines.push('Soft Skills: ' + softArr.join(', ') + '.');
+      var validExp = (data.exp || []).filter(function (e) { return e.company || e.role; });
+      var lastThree = validExp.slice(-3);
+      var older = validExp.slice(0, Math.max(0, validExp.length - 3));
+      if (lastThree.length) {
+        lines.push('EXPERIÊNCIA PROFISSIONAL (últimas ' + lastThree.length + ' de ' + validExp.length + '):');
+        lastThree.forEach(function (e, i) {
+          lines.push((i + 1) + '. ' + [e.company, e.role, e.period, e.location].filter(Boolean).join(' · ') + '.');
+          var bullets = (e.bullets || '').split(/\r?\n/).map(function (s) { return s.replace(/^[•\-\*\d\.\)\s]+/, '').trim(); }).filter(Boolean);
+          if (bullets.length) lines.push('   Conquistas: ' + bullets.join(' ') + '.');
+        });
+      }
+      if (older.length) {
+        lines.push('Experiências Anteriores (Resumo para Escaneabilidade):');
+        older.forEach(function (o) {
+          var oneBullet = ((o.bullets || '').split(/\r?\n/).map(function (s) { return s.replace(/^[•\-\*\d\.\)\s]+/, '').trim(); }).filter(Boolean)[0]) || '';
+          lines.push(' • ' + [o.company, o.role, o.period].filter(Boolean).join(' | ') + (oneBullet ? ' – ' + oneBullet.replace(/\.?$/, '.') : '.'));
+        });
+      }
+      var edus = (data.edu || []).filter(function (x) { return x.institution || x.course; });
+      if (edus.length) {
+        lines.push('FORMAÇÃO ACADÊMICA:');
+        edus.forEach(function (e) {
+          lines.push(' • ' + [e.course, e.institution, e.period].filter(Boolean).join(' | ') + '.');
+          if (e.extra) lines.push(' • Extensões e Cursos Técnicos: ' + String(e.extra).replace(/\s+/g, ' ').replace(/\.?$/, '.'));
+        });
+      }
+      var certs = (data.cert || []).filter(function (c) { return c.name; });
+      if (certs.length) {
+        lines.push('CERTIFICAÇÕES PROFISSIONAIS:');
+        var principais = [], adicionais = [];
+        certs.forEach(function (c) {
+          var full = [c.name, c.issuer, c.year].filter(Boolean).join(', ');
+          var add = /(curso|formação|formacao|treinamento|workshop|bootcamp|governança|governanca|lgpd|avançada|avancada|multistack)/i.test((c.name || '') + ' ' + (c.issuer || ''));
+          if (add) adicionais.push(full); else principais.push(full);
+        });
+        principais.forEach(function (p) { lines.push(' • ' + p.replace(/\.?$/, '.')); });
+        if (adicionais.length) lines.push(' • Formações Técnicas Adicionais: ' + adicionais.join('; ') + '.');
+      }
+      var langs = (data.lang || []).filter(function (l) { return l.name || l.level; });
+      if (langs.length) lines.push('IDIOMAS: ' + langs.map(function (l) { return [l.name, l.level, l.certificate].filter(Boolean).join(' · '); }).join('; ') + '.');
+      return lines.join('\n');
+    }
+
+    function updateCvAltText(data) {
+      var el = document.getElementById('cvAltText');
+      if (!el) return;
+      try { el.textContent = buildCvAltText(data); } catch (_) {}
+    }
+
+    // --------- Summary visual bar ---------
+    function updateSummaryBar(val) {
+      var bar = document.getElementById('summaryBar');
+      if (!bar) return;
+      var pct = Math.min(100, Math.round((countChars(val) / 750) * 100));
+      bar.style.width = String(pct) + '%';
+      bar.classList.remove('is-weak', 'is-ok', 'is-good');
+      if (countChars(val) < 150) bar.classList.add('is-weak');
+      else if (countChars(val) < 250) bar.classList.add('is-ok');
+      else bar.classList.add('is-good');
+    }
+
+    // --------- Stepper Keyboard Nav (roving tabindex) ---------
+    function initStepperKeyboard() {
+      var stepsContainer = document.getElementById('atsStepper');
+      if (!stepsContainer) return;
+      var btns = Array.prototype.slice.call(stepsContainer.querySelectorAll('.ats-step'));
+      stepsContainer.addEventListener('keydown', function (ev) {
+        var cur = document.activeElement;
+        var idx = btns.indexOf(cur);
+        if (idx === -1) return;
+        var next = -1;
+        if (ev.key === 'ArrowRight' || ev.key === 'ArrowDown') next = (idx + 1) % btns.length;
+        else if (ev.key === 'ArrowLeft' || ev.key === 'ArrowUp') next = (idx - 1 + btns.length) % btns.length;
+        else if (ev.key === 'Home') next = 0;
+        else if (ev.key === 'End') next = btns.length - 1;
+        if (next !== -1) {
+          ev.preventDefault();
+          btns.forEach(function (b, i) { b.setAttribute('tabindex', i === next ? '0' : '-1'); });
+          btns[next].focus();
+        }
+      });
+    }
+
+    // --------- Sticky Preview Toggle ---------
+    function initPreviewPinToggle() {
+      var btn = document.getElementById('atsPreviewPinBtn');
+      var aside = document.getElementById('atsPreviewSide');
+      if (!btn || !aside) return;
+      btn.addEventListener('click', function () {
+        var pinned = aside.classList.toggle('pinned');
+        btn.setAttribute('aria-pressed', String(pinned));
+      });
+      aside.classList.add('pinned');
+    }
+
     // --------- Step Navigation ---------
     function showStep(idx) {
       state.currentStep = Math.max(0, Math.min(stepperBtns.length - 1, idx));
@@ -513,6 +845,7 @@
         b.classList.toggle('active', i === state.currentStep);
         b.classList.toggle('done', i < state.currentStep);
         b.setAttribute('aria-selected', String(i === state.currentStep));
+        b.setAttribute('tabindex', i === state.currentStep ? '0' : '-1');
       });
       panels.forEach(function (p, i) {
         if (i === state.currentStep) {
@@ -526,7 +859,11 @@
         prevBtn.disabled = state.currentStep === 0;
         prevBtn.style.visibility = state.currentStep === 0 ? 'hidden' : 'visible';
       }
-      if (nextBtn) nextBtn.textContent = state.currentStep === stepperBtns.length - 1 ? 'Finalizar ✓' : 'Próximo →';
+      if (nextBtn) {
+        var isLast = state.currentStep === stepperBtns.length - 1;
+        nextBtn.textContent = isLast ? 'Finalizar ✓' : 'Próximo →';
+        nextBtn.setAttribute('aria-label', isLast ? 'Finalizar e validar currículo' : 'Avançar para o próximo passo');
+      }
     }
 
     stepperBtns.forEach(function (btn) {
@@ -539,10 +876,17 @@
     if (prevBtn) prevBtn.addEventListener('click', function () { showStep(state.currentStep - 1); });
     if (nextBtn) nextBtn.addEventListener('click', function () {
       if (state.currentStep === stepperBtns.length - 1) {
-        // Finalizar: rola para o preview e valida
         validateAll();
+        updateProgressBar();
         window.scrollTo({ top: document.getElementById('ats-builder').offsetTop - 80, behavior: 'smooth' });
       } else {
+        var stepErrs = validateCurrentStep();
+        showStepErrors(stepErrs);
+        if (stepErrs.length > 0) {
+          var firstInvalid = form.querySelector('.is-invalid input, .is-invalid textarea');
+          if (firstInvalid) { firstInvalid.focus(); firstInvalid.scrollIntoView && firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+          return;
+        }
         showStep(state.currentStep + 1);
       }
     });
@@ -684,6 +1028,71 @@
       });
     }
 
+    function renderLangList() {
+      const root = elsAts.list.lang;
+      if (!root) return;
+      root.innerHTML = '';
+      if (state.lang.length === 0) state.lang.push({ name: '', level: '', certificate: '' });
+      state.lang.forEach(function (l, i) {
+        const block = document.createElement('div');
+        block.className = 'ats-nested';
+        block.innerHTML =
+          '<div class="ats-nested__header">' +
+            '<div class="ats-nested__title"><span aria-hidden="true">[Idioma] </span>#' + (i + 1) + '</div>' +
+            (state.lang.length > 1 ? '<button type="button" class="ats-nested__remove" data-remove-lang="' + i + '">Remover</button>' : '') +
+          '</div>' +
+          '<div class="ats-nested__grid">' +
+            '<label class="ats-field"><span>Idioma *</span><input data-lang="name" value="' + escapeHtml(l.name) + '" placeholder="Inglês, Espanhol, Francês, Alemão, Japonês..."></label>' +
+            '<label class="ats-field"><span>Proficiência / Nível *</span>' +
+              '<select data-lang="level" aria-label="Nível de proficiência do idioma">' +
+                '<option value=""' + (l.level === '' ? ' selected' : '') + '>Selecione o nível...</option>' +
+                '<option value="Nativo"' + (l.level === 'Nativo' ? ' selected' : '') + '>Nativo / Língua Materna</option>' +
+                '<option value="Fluente / C2"' + (l.level === 'Fluente / C2' ? ' selected' : '') + '>Fluente (C2 · Proficiente)</option>' +
+                '<option value="Avançado / C1"' + (l.level === 'Avançado / C1' ? ' selected' : '') + '>Avançado (C1)</option>' +
+                '<option value="Intermediário / B2"' + (l.level === 'Intermediário / B2' ? ' selected' : '') + '>Intermediário Superior (B2)</option>' +
+                '<option value="Intermediário / B1"' + (l.level === 'Intermediário / B1' ? ' selected' : '') + '>Intermediário (B1)</option>' +
+                '<option value="Básico / A2"' + (l.level === 'Básico / A2' ? ' selected' : '') + '>Básico (A2)</option>' +
+                '<option value="Iniciante / A1"' + (l.level === 'Iniciante / A1' ? ' selected' : '') + '>Iniciante (A1)</option>' +
+              '</select>' +
+            '</label>' +
+            '<label class="ats-field ats-field--full"><span>Certificação oficial (opcional)</span><input data-lang="certificate" value="' + escapeHtml(l.certificate) + '" placeholder="TOEFL iBT 105 · IELTS Academic 7.5 · Cambridge C1 Advanced · DELE B2 · JLPT N2"></label>' +
+          '</div>';
+        root.appendChild(block);
+      });
+
+      root.querySelectorAll('[data-remove-lang]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          const idx = parseInt(b.getAttribute('data-remove-lang') || '0', 10);
+          state.lang.splice(idx, 1);
+          renderLangList();
+          runAtsPipeline();
+        });
+      });
+
+      root.querySelectorAll('[data-lang]').forEach(function (inp) {
+        inp.addEventListener('input', function (ev) {
+          const p = ev.target.closest('.ats-nested');
+          const idx = Array.prototype.indexOf.call(root.children, p);
+          if (idx === -1) return;
+          const key = ev.target.getAttribute('data-lang');
+          state.lang[idx][key] = ev.target.value;
+          saveState();
+          runAtsPipeline();
+        });
+        inp.addEventListener('change', function (ev) {
+          if (ev.target.tagName && ev.target.tagName.toLowerCase() === 'select') {
+            const p = ev.target.closest('.ats-nested');
+            const idx = Array.prototype.indexOf.call(root.children, p);
+            if (idx === -1) return;
+            const key = ev.target.getAttribute('data-lang');
+            state.lang[idx][key] = ev.target.value;
+            saveState();
+            runAtsPipeline();
+          }
+        });
+      });
+    }
+
     if (addExpBtn) addExpBtn.addEventListener('click', function () {
       state.exp.push({ company: '', role: '', period: '', location: '', bullets: '' });
       renderExpList();
@@ -699,6 +1108,11 @@
       renderCertList();
       runAtsPipeline();
     });
+    if (addLangBtn) addLangBtn.addEventListener('click', function () {
+      state.lang.push({ name: '', level: '', certificate: '' });
+      renderLangList();
+      runAtsPipeline();
+    });
 
     // --------- Collect data from form + dynamic lists ---------
     function collectData(silent) {
@@ -706,9 +1120,10 @@
         form: {},
         exp: state.exp.map(function (x) { return Object.assign({}, x); }),
         edu: state.edu.map(function (x) { return Object.assign({}, x); }),
-        cert: state.cert.map(function (x) { return Object.assign({}, x); })
+        cert: state.cert.map(function (x) { return Object.assign({}, x); }),
+        lang: state.lang.map(function (x) { return Object.assign({}, x); })
       };
-      const fields = ['fullName', 'role', 'email', 'phone', 'location', 'linkedin', 'portfolio', 'summary', 'skills', 'frameworks', 'tools'];
+      const fields = ['fullName', 'role', 'email', 'phone', 'location', 'linkedin', 'portfolio', 'summary', 'skills', 'frameworks', 'tools', 'softskills'];
       fields.forEach(function (f) {
         const inp = form.querySelector('[name="' + f + '"]');
         if (inp) data.form[f] = inp.value || '';
@@ -718,19 +1133,22 @@
 
     function applyLoadedState(data) {
       if (!data) return;
-      const fields = ['fullName', 'role', 'email', 'phone', 'location', 'linkedin', 'portfolio', 'summary', 'skills', 'frameworks', 'tools'];
+      var fields = ['fullName', 'role', 'email', 'phone', 'location', 'linkedin', 'portfolio', 'summary', 'skills', 'frameworks', 'tools', 'softskills'];
       fields.forEach(function (f) {
-        const inp = form.querySelector('[name="' + f + '"]');
-        if (inp && data.form && data.form[f] != null) inp.value = data.form[f];
+        var inp = form.querySelector('[name="' + f + '"]');
+        if (inp && data.form && data.form[f] != null) {
+          inp.value = (f === 'phone') ? applyPhoneMask(data.form[f]) : data.form[f];
+        }
       });
       if (Array.isArray(data.exp) && data.exp.length) state.exp = data.exp;
       if (Array.isArray(data.edu) && data.edu.length) state.edu = data.edu;
       if (Array.isArray(data.cert) && data.cert.length) state.cert = data.cert;
+      if (Array.isArray(data.lang) && data.lang.length) state.lang = data.lang;
       renderExpList();
       renderEduList();
       renderCertList();
-      // Update summary counter
-      const summaryEl = form.querySelector('[name="summary"]');
+      renderLangList();
+      var summaryEl = form.querySelector('[name="summary"]');
       if (summaryEl && summaryCount) summaryCount.textContent = countChars(summaryEl.value);
     }
 
@@ -740,14 +1158,15 @@
           fullName: 'Fabrício Duarte',
           role: 'QA Automation Engineer & Senior Test Analyst',
           email: 'fabricio.4135@gmail.com',
-          phone: '(61) 98426-0515',
+          phone: '61 98426-0515',
           location: 'Brasília - DF',
           linkedin: 'https://www.linkedin.com/in/fabr%C3%ADcio-duarte-5223062a/',
           portfolio: 'https://github.com/bioadsl',
           summary: 'Analista de Testes Sênior e QA Automation Engineer com mais de 10 anos de sólida experiência em engenharia de qualidade de software, com forte atuação em liderança técnica e automação de testes funcionais e não-funcionais. Especialista na criação de robustos Test Automation Frameworks (Selenium, Cypress, Playwright, Katalon, Robot) para Web e Mobile. Amplo domínio em validação de APIs REST/SOAP com Postman, Newman e RestAssured. Atuação em sistemas de alta complexidade e missão crítica (Financeiro, Segurança Pública, Telecomunicações). Profissional certificado ISTQB CTFL, cultura Shift-Left e metodologias ágeis Scrum/Kanban com integração contínua em pipelines Jenkins e GitLab CI.',
-          skills: 'Java, Python, JavaScript, Ruby, SQL, COBOL, TypeScript, HTML, CSS',
+          skills: 'Java, Python, JavaScript, Ruby, SQL, COBOL, TypeScript, HTML, CSS, CI/CD',
           frameworks: 'Selenium WebDriver, Cypress, Playwright, Katalon Studio, Robot Framework, Cucumber, JUnit, Behave, Capybara, RestAssured, LeanFT',
-          tools: 'Postman, Newman, Apidog, Swagger/OpenAPI, SoapUI, JMeter, Jenkins, Git, GitHub, GitLab CI, Jira, Redmine, TestLink, QASE, IBM RQM, Zephir, SonarQube, AWS, Docker, Scrum, Kanban, Shift-Left, ISTQB, Graylog, Mainframe · Idiomas: Português (Nativo), Inglês B2 (Intermediário)'
+          tools: 'Postman, Newman, Apidog, Swagger/OpenAPI, SoapUI, JMeter, Jenkins, Git, GitHub, GitLab CI, Jira, Redmine, TestLink, QASE, IBM RQM, Zephir, SonarQube, AWS, Docker, Scrum, Kanban, Shift-Left, ISTQB, Graylog, Mainframe, LeanFT, HTML Reports',
+          softskills: 'Liderança Técnica, Capacidade Analítica, Atenção aos Detalhes, Comunicação Clara, Proatividade, Organização, Pensamento Crítico, Resolução de Problemas, Trabalho em Equipe, Adaptabilidade, Colaboração'
         },
         exp: [
           {
@@ -780,6 +1199,11 @@
           { name: 'Automação Web Avançada com Python, Selenium e Behave', issuer: 'Formação Técnica', year: '2023' },
           { name: 'Automação Multistack com Capybara, Cucumber e Ruby', issuer: 'Formação Técnica', year: '2022' },
           { name: 'Treinamento e Governança em LGPD', issuer: 'Compliance', year: '2024' }
+        ],
+        lang: [
+          { name: 'Português', level: 'Nativo', certificate: '' },
+          { name: 'Inglês', level: 'Intermediário / B2', certificate: 'Cambridge B2 First (FCE) · Pontuação 178' },
+          { name: 'Espanhol', level: 'Básico / A2', certificate: '' }
         ]
       };
       applyLoadedState(demo);
@@ -789,30 +1213,227 @@
 
     function clearAll() {
       if (!confirm('Tem certeza que deseja limpar todo o conteúdo do currículo?')) return;
-      state.exp = []; state.edu = []; state.cert = [];
-      form.reset();
-      renderExpList(); renderEduList(); renderCertList();
-      clearState();
-      runAtsPipeline();
+      var errors = [];
+
+      // Passo 1: Limpa Storage (tanto localStorage principal quanto sessionStorage temporário e qualquer chave de backup)
+      try {
+        clearState();
+        try { sessionStorage.removeItem(STORAGE_KEY); } catch (_) {}
+        try {
+          // Remove qualquer outra chave que possa ser derivada do ATS Builder (backup, import temp, etc)
+          var i = localStorage.length;
+          while (i--) {
+            try {
+              var k = localStorage.key(i);
+              if (k && /resume|ats-builder|curriculo|linkedin-import|cv-import/i.test(k)) localStorage.removeItem(k);
+            } catch (_) {}
+          }
+          i = sessionStorage.length;
+          while (i--) {
+            try {
+              var sk = sessionStorage.key(i);
+              if (sk && /resume|ats-builder|curriculo|linkedin-import|cv-import/i.test(sk)) sessionStorage.removeItem(sk);
+            } catch (_) {}
+          }
+        } catch (_) {}
+      } catch (e) { errors.push('storage: ' + (e && e.message || e)); }
+
+      // Passo 2: Reseta state completamente
+      try {
+        state = {
+          currentStep: 0,
+          form: {},
+          exp: [],
+          edu: [],
+          cert: [],
+          lang: []
+        };
+        currentStep = 0;
+      } catch (e) { errors.push('state-reset: ' + (e && e.message || e)); }
+
+      // Passo 3: Reseta o <form> HTML nativo + força limpeza de todos inputs
+      try {
+        form.reset();
+        // Não confia só no form.reset(): força '' em text/email/tel/url/search/textarea/number + limpa selects
+        var allInputs = form.querySelectorAll('input, textarea, select');
+        allInputs.forEach(function (el) {
+          try {
+            var t = el.type && String(el.type).toLowerCase();
+            if (t === 'file') { try { el.value = ''; } catch (_) {} return; }
+            if (t === 'checkbox' || t === 'radio') { el.checked = false; return; }
+            if (el.tagName === 'SELECT') {
+              if (el.options && el.options.length) el.selectedIndex = 0;
+              el.value = '';
+            } else {
+              el.value = '';
+            }
+            el.removeAttribute('value');
+          } catch (_) {}
+        });
+      } catch (e) { errors.push('form-reset: ' + (e && e.message || e)); }
+
+      // Passo 4: Reseta contadores, summaryBar, estado touched/erros de validação em TODOS os campos
+      try {
+        if (summaryCount) summaryCount.textContent = '0 caracteres';
+        if (typeof updateSummaryBar === 'function') updateSummaryBar('');
+        form.querySelectorAll('.ats-field').forEach(function (label) {
+          label.classList.remove('is-valid', 'is-invalid', 'is-warn', 'is-touched');
+        });
+        form.querySelectorAll('.ats-field__error').forEach(function (errEl) {
+          errEl.textContent = '';
+          errEl.hidden = true;
+        });
+        var stepErrorsEl = document.getElementById('atsStepErrors');
+        if (stepErrorsEl) { stepErrorsEl.hidden = true; stepErrorsEl.innerHTML = ''; }
+      } catch (e) { errors.push('validation-ui: ' + (e && e.message || e)); }
+
+      // Passo 5: Re-renderiza listas dinâmicas VAZIAS
+      try {
+        renderExpList && renderExpList();
+        renderEduList && renderEduList();
+        renderCertList && renderCertList();
+        renderLangList && renderLangList();
+      } catch (e) { errors.push('render-lists: ' + (e && e.message || e)); }
+
+      // Passo 6: Volta para Passo 1 (Dados Pessoais) + foca primeiro campo
+      try {
+        if (typeof showStep === 'function') showStep(0);
+        setTimeout(function () {
+          try {
+            var firstInput = form.querySelector('input[type="text"], input[type="email"], textarea, select');
+            if (firstInput && typeof firstInput.focus === 'function') firstInput.focus({ preventScroll: true });
+          } catch (_) {}
+        }, 60);
+      } catch (e) { errors.push('showstep-focus: ' + (e && e.message || e)); }
+
+      // Passo 7: Reseta UI do importador LinkedIn (todas as camadas: dropzone / review / compact / thanks / progress / error / file)
+      try {
+        // Muda para modo dropzone (se existir)
+        if (typeof setImportMode === 'function') try { setImportMode('dropzone'); } catch (_) {}
+        if (typeof clearError === 'function') try { clearError(); } catch (_) {}
+        if (typeof hideProgress === 'function') try { hideProgress(); } catch (_) {}
+
+        // Esconde paineis e banners um por um, individualmente com try/catch
+        var ids = ['atsThanksBanner', 'atsImportPanel', 'atsImportCompact', 'atsImportReview'];
+        ids.forEach(function (id) {
+          var el = document.getElementById(id);
+          if (el) { try { el.hidden = true; } catch (_) {} }
+        });
+
+        // Limpa CONTEÚDO TEXTUAL do banner compacto (arquivo importado anteriormente)
+        try {
+          var cf = document.getElementById('atsCompactFile');
+          if (cf) cf.textContent = '—';
+          var cs = document.getElementById('atsCompactSub');
+          if (cs) cs.textContent = 'Extração concluída. Campos mapeados do seu perfil.';
+        } catch (_) {}
+
+        // Limpa a tabela/quadro de estatísticas de review do import
+        try {
+          var stats = document.getElementById('atsImportStats');
+          if (stats) stats.innerHTML = '';
+        } catch (_) {}
+
+        // Limpa mensagem de erro do importador
+        try {
+          var errEl = document.getElementById('atsImportError');
+          if (errEl) { errEl.textContent = ''; errEl.hidden = true; }
+        } catch (_) {}
+
+        // Limpa classe visual de "drag over" no dropzone
+        try {
+          var dz = document.getElementById('atsDropzone');
+          if (dz) {
+            dz.classList.remove('is-dragover', 'is-over', 'dragover', 'drag-over');
+            dz.removeAttribute('aria-dropeffect');
+          }
+        } catch (_) {}
+
+        // Limpa <input type="file"> (arquivo escolhido anteriormente)
+        try {
+          var fi = document.getElementById('atsFileInput');
+          if (fi) {
+            fi.value = '';
+            try { fi.files = new DataTransfer().files; } catch (_) {}
+          }
+        } catch (_) {}
+      } catch (e) { errors.push('import-ui: ' + (e && e.message || e)); }
+
+      // Passo 8: Reseta barra de progresso geral do formulário
+      try {
+        if (typeof calcOverallProgress === 'function') calcOverallProgress();
+      } catch (e) { errors.push('progress: ' + (e && e.message || e)); }
+
+      // Passo 9: Persiste estado vazio e força re-execução do pipeline ATS
+      try { saveState(); } catch (_) {}
+      try { if (typeof runAtsPipeline === 'function') runAtsPipeline(); } catch (e) { errors.push('pipeline: ' + (e && e.message || e)); }
+
+      // 10. Garantia final: re-remove a chave do storage de novo, por segurança
+      try { clearState(); } catch (_) {}
+
+      // Tratamento de erro amigável (não trava o usuário — só avisa no console se algo falhou em submódulo)
+      if (errors.length) {
+        try { console.warn('[ATS Builder:clearAll] passos com recuperação de falha:', errors); } catch (_) {}
+      }
     }
 
-    if (fillDemoBtn) fillDemoBtn.addEventListener('click', fillDemoData);
-    if (clearBtn) clearBtn.addEventListener('click', clearAll);
-    if (printBtn) printBtn.addEventListener('click', function () {
-      // Exporta o currículo para PDF nativo via window.print + estilos @media print ATS
-      window.setTimeout(function () {
-        window.print();
-      }, 60);
-    });
+    // --------- Bindings principais (wrap defensivo: 1 erro em 1 botão NÃO PODE quebrar os demais) ---------
+    try { if (fillDemoBtn) fillDemoBtn.addEventListener('click', function (e) { try { e && e.preventDefault && e.preventDefault(); fillDemoData(); } catch (err) { console.error('[ATS Builder:demoData]', err); } }); }
+    catch (err) { console.error('[ATS Builder:init] falha no bind demoBtn (não impede clearBtn)', err); }
+
+    try { if (clearBtn) clearBtn.addEventListener('click', function (e) { try { e && e.preventDefault && e.preventDefault(); clearAll(); } catch (err) { console.error('[ATS Builder:clearAll] FALHA CRÍTICA (fallback forçado):', err); try { fallbackClearAll(); } catch (e2) { console.error(e2); } } }); }
+    catch (err) {
+      console.error('[ATS Builder:init] FALHA CRÍTICA no bind do clearBtn — instalando fallback onclick global', err);
+      try {
+        // Fallback último recurso: onclick direto no elemento (funciona mesmo se addEventListener throwar)
+        if (clearBtn) clearBtn.onclick = function (ev) { try { ev && ev.preventDefault && ev.preventDefault(); clearAll(); } catch (e2) { try { fallbackClearAll(); } catch (_) {} } };
+      } catch (_) {}
+    }
+
+    try { if (printBtn) printBtn.addEventListener('click', function () {
+      try {
+        // Exporta o currículo para PDF nativo via window.print + estilos @media print ATS
+        window.setTimeout(function () {
+          try { window.print(); } catch (err) { console.error('window.print falhou:', err); }
+        }, 60);
+      } catch (err) { console.error('[ATS Builder:print]', err); }
+    }); } catch (err) { console.error('[ATS Builder:init] falha no bind printBtn', err); }
+
+    // Fallback ultra-seguro de limpeza (roda mesmo se algum helper do clearAll quebrar)
+    function fallbackClearAll() {
+      try {
+        try { localStorage.clear(); } catch (_) {}
+        try { sessionStorage.clear(); } catch (_) {}
+        try { form.reset(); } catch (_) {}
+        try { window.location.reload(); } catch (_) {}
+      } catch (_) {}
+    }
+
+    try { window.__atsClearAll = clearAll; window.__atsFallbackClearAll = fallbackClearAll; } catch (_) { /* sandboxed iframe: ignora */ }
 
     // --------- Live form events: input + preview update ---------
     form.addEventListener('input', function (ev) {
+      var target = ev.target;
+      if (target && target.name) {
+        if (VALIDATORS[target.name]) {
+          validateFieldByName(target.name, target.value);
+        }
+        if (target.name === 'summary') {
+          updateSummaryBar(target.value);
+        }
+      }
       saveState();
-      // Summary counter
-      if (ev.target && ev.target.name === 'summary' && summaryCount) {
+      if (summaryCount && ev.target && ev.target.name === 'summary') {
         summaryCount.textContent = countChars(ev.target.value);
       }
       runAtsPipeline();
+    });
+
+    form.addEventListener('focusout', function (ev) {
+      var target = ev.target;
+      if (target && target.name && VALIDATORS[target.name]) {
+        validateFieldByName(target.name, target.value);
+      }
     });
 
     // --------- Render Live Preview (CV paper) ---------
@@ -832,81 +1453,261 @@
 
       if (cv.contact) {
         const parts = [];
-        if (f.email) parts.push(f.email);
-        if (f.phone) parts.push(f.phone);
-        if (f.location) parts.push(f.location);
-        if (f.linkedin) parts.push('LinkedIn: ' + f.linkedin.replace(/^https?:\/\//, ''));
-        if (f.portfolio) parts.push('Portfólio: ' + f.portfolio.replace(/^https?:\/\//, ''));
-        cv.contact.innerHTML = parts.map(escapeHtml).join(' &nbsp;·&nbsp; ');
+        var pushHtml = function (rawHtml) { parts.push(rawHtml); };
+        if (f.location) {
+          if (/distrito federal|brasilia|brasília|\bDF\b/i.test(f.location)) {
+            pushHtml(escapeHtml('Distrito Federal, Brasil'));
+          } else {
+            pushHtml(escapeHtml(f.location + ', Brasil'));
+          }
+        }
+        if (f.email) {
+          var email = String(f.email).trim();
+          var mailto = 'mailto:' + encodeURIComponent(email);
+          pushHtml('<a href="' + escapeHtml(mailto) + '" class="cv-contact__link" target="_blank" rel="noopener noreferrer" aria-label="E-mail: ' + escapeHtml(email) + '">' + escapeHtml(email) + '</a>');
+        }
+        if (f.linkedin) {
+          var linkedin = String(f.linkedin).trim();
+          if (!/^https?:\/\//i.test(linkedin)) linkedin = 'https://' + linkedin.replace(/^\/+/, '');
+          pushHtml('<a href="' + escapeHtml(linkedin) + '" class="cv-contact__link" target="_blank" rel="noopener noreferrer" aria-label="Perfil do LinkedIn: ' + escapeHtml(linkedin) + '">Linkedin</a>');
+        }
+        if (f.portfolio) {
+          var port = String(f.portfolio).trim();
+          if (!/^https?:\/\//i.test(port)) port = 'https://' + port.replace(/^\/+/, '');
+          var portLabel = /github\.com/i.test(port) ? 'GitHub' : 'Portfólio';
+          pushHtml('<a href="' + escapeHtml(port) + '" class="cv-contact__link" target="_blank" rel="noopener noreferrer" aria-label="Portfólio / GitHub: ' + escapeHtml(port) + '">' + escapeHtml(portLabel) + '</a>');
+        }
+        if (f.phone) {
+          var tel = String(f.phone).replace(/\D+/g, '');
+          if (tel.length >= 10) {
+            var telHref = 'tel:+55' + tel.replace(/^55/, '');
+            pushHtml('<a href="' + escapeHtml(telHref) + '" class="cv-contact__link" aria-label="Telefone: ' + escapeHtml(f.phone) + '">' + escapeHtml(f.phone) + '</a>');
+          } else {
+            pushHtml(escapeHtml(f.phone));
+          }
+        }
+        cv.contact.innerHTML = parts.join(' · ');
       }
 
       setText(cv.summary, f.summary);
 
+      // PRINCIPAIS COMPETÊNCIAS (1:1 com o formulário de habilidades):
+      // - [Label agregado] Hard Skills: união DEDUP das 3 categorias de hard skills (linguagens + frameworks + metodologias).
+      // - [1] Linguagens & Tecnologias        ← textarea [name="skills"] (obrigatório do form)
+      // - [2] Frameworks de Automação e Ferramentas ← textarea [name="frameworks"]
+      // - [3] Metodologias ← textarea [name="tools"] (Ferramentas & Metodologias do form)
+      // - [4] Soft Skills ← textarea [name="softskills"] (Comportamentais / Culturais)
       if (cv.skills) {
-        const blocks = [f.skills, f.frameworks, f.tools].filter(function (x) { return x && x.trim(); });
-        if (!blocks.length) { cv.skills.classList.add('cv__empty'); cv.skills.textContent = 'Java · Python · SQL · Selenium · Postman · Cypress · Jenkins · Scrum'; }
-        else {
+        var dedupNormalize = function (s) {
+          return String(s || '')
+            .toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '');
+        };
+        var splitClean = function (raw) {
+          if (!raw) return [];
+          return String(raw).split(/[,;\n]+/).map(function (s) {
+            return s.replace(/^\s*[-•*\d\.\)\s]+/, '').replace(/\s*\.\s*$/, '').trim();
+          }).filter(Boolean);
+        };
+
+        var linguagensList = splitClean(f.skills);
+        var frameworksList = splitClean(f.frameworks);
+        var metodologiasList = splitClean(f.tools);
+        var softList = splitClean(f.softskills);
+
+        var defaults = {
+          linguagens: ['Java', 'Python', 'JavaScript', 'Ruby', 'SQL', 'COBOL', 'TypeScript', 'HTML', 'CSS', 'CI/CD'],
+          frameworks: ['Selenium WebDriver', 'Cypress', 'Playwright', 'Katalon Studio', 'Robot Framework', 'Cucumber', 'JUnit', 'Behave', 'Capybara', 'RestAssured'],
+          metodologias: ['Postman', 'Newman', 'Apidog', 'Swagger/OpenAPI', 'SoapUI', 'JMeter', 'Jenkins', 'Git', 'GitHub', 'GitLab CI', 'Jira', 'Redmine', 'TestLink', 'QASE', 'IBM RQM', 'Zephir', 'SonarQube', 'AWS', 'Docker', 'Scrum', 'Kanban', 'Shift-Left', 'ISTQB', 'Graylog', 'Mainframe', 'LeanFT', 'HTML Reports'],
+          soft: ['Liderança Técnica', 'Capacidade Analítica', 'Atenção aos Detalhes', 'Comunicação Clara', 'Proatividade', 'Organização', 'Pensamento Crítico', 'Resolução de Problemas', 'Trabalho em Equipe', 'Adaptabilidade', 'Colaboração']
+        };
+
+        var hasExplicit = linguagensList.length + frameworksList.length + metodologiasList.length + softList.length > 0;
+        if (!hasExplicit) {
+          linguagensList = defaults.linguagens.slice();
+          frameworksList = defaults.frameworks.slice();
+          metodologiasList = defaults.metodologias.slice();
+          softList = defaults.soft.slice();
+          cv.skills.classList.add('cv__empty');
+        } else {
           cv.skills.classList.remove('cv__empty');
-          cv.skills.textContent = blocks.map(function (b) {
-            return b.split(/[,;]/).map(function (s) { return s.trim(); }).filter(Boolean).join(' · ');
-          }).join('\n');
+          if (!linguagensList.length) linguagensList = defaults.linguagens.slice();
+          if (!frameworksList.length) frameworksList = defaults.frameworks.slice();
+          if (!metodologiasList.length) metodologiasList = defaults.metodologias.slice();
+          if (!softList.length) softList = defaults.soft.slice();
         }
+
+        // Dedup interno de cada categoria (mantém ordem de aparição)
+        function dedup(arr) {
+          var seen = new Set(); var out = [];
+          for (var i = 0; i < arr.length; i++) {
+            var item = arr[i]; var key = dedupNormalize(item);
+            if (!key || seen.has(key)) continue;
+            seen.add(key); out.push(item);
+          }
+          return out;
+        }
+        linguagensList = dedup(linguagensList);
+        frameworksList = dedup(frameworksList);
+        metodologiasList = dedup(metodologiasList);
+        softList = dedup(softList);
+
+        // Hard Skills (label agregado): união dedup das 3 categorias de hard skills.
+        // (Soft Skills NÃO entra no agregado de hard skills — categoria separada).
+        var hardSeen = new Set();
+        var hardSkillsArr = [];
+        function pushHard(item) {
+          var k = dedupNormalize(item); if (!k) return;
+          if (hardSeen.has(k)) return;
+          hardSeen.add(k); hardSkillsArr.push(item);
+        }
+        linguagensList.forEach(pushHard);
+        frameworksList.forEach(pushHard);
+        metodologiasList.forEach(pushHard);
+        if (!hardSkillsArr.length) hardSkillsArr = defaults.linguagens.concat(defaults.frameworks).concat(defaults.metodologias);
+
+        cv.skills.innerHTML =
+          '<p><strong>Hard Skills:</strong> ' + hardSkillsArr.map(escapeHtml).join(', ') + '.</p>' +
+          '<p><strong>Linguagens &amp; Tecnologias:</strong> ' + linguagensList.map(escapeHtml).join(', ') + '.</p>' +
+          '<p><strong>Frameworks de Automação e Ferramentas:</strong> ' + frameworksList.map(escapeHtml).join(', ') + '.</p>' +
+          '<p><strong>Metodologias:</strong> ' + metodologiasList.map(escapeHtml).join(', ') + '.</p>' +
+          '<p><strong>Soft Skills:</strong> ' + softList.map(escapeHtml).join(', ') + '.</p>';
       }
 
-      // Experience
+      // Experiência Profissional: 3 últimas completas + demais em "Experiências Anteriores (Resumo para Escaneabilidade)"
       if (cv.exp) {
-        const has = data.exp && data.exp.some(function (e) { return e.company || e.role; });
-        if (!has) { cv.exp.classList.add('cv__empty'); cv.exp.innerHTML = 'Exemplo:<br><strong>EMPRESA</strong> — Cargo · Jan/2023 – Atual · Cidade - UF<br>• Implementei framework de automação reduzindo tempo de regressão em 60%.'; }
-        else {
+        var validExp = (data.exp || []).filter(function (e) { return e.company || e.role; });
+        if (validExp.length === 0) {
+          cv.exp.classList.add('cv__empty');
+          cv.exp.innerHTML =
+            '<div class="cv-exp__job">' +
+              '<p class="cv-exp__company">Meta</p>' +
+              '<p class="cv-exp__position">Analista de Qualidade de Software III (Sênior)</p>' +
+              '<p class="cv-exp__period">Dezembro de 2025 – Atual</p>' +
+              '<ul class="cv-exp__bullets">' +
+                '<li>Otimizei a estabilidade e a confiabilidade de plataformas globais conectando bilhões de usuários, por meio de automação de testes em alta performance.</li>' +
+                '<li>Garanti a integridade de contratos e regras de negócio em arquiteturas de microsserviços escaláveis, com validações rigorosas de APIs REST.</li>' +
+              '</ul>' +
+            '</div>';
+        } else {
           cv.exp.classList.remove('cv__empty');
-          cv.exp.innerHTML = data.exp.map(function (e) {
-            const bullets = (e.bullets || '')
+          var lastThree = validExp.slice(-3);
+          var older = validExp.slice(0, Math.max(0, validExp.length - 3));
+          var bulletMap = function (raw) {
+            return (raw || '')
               .split(/\r?\n/)
               .map(function (s) { return s.replace(/^[•\-\*\d\.\)\s]+/, '').trim(); })
               .filter(Boolean)
-              .map(function (b) { return '<li>' + escapeHtml(b) + '</li>'; })
+              .map(function (b) { return '<li>' + escapeHtml(b.endsWith('.') ? b : (b + '.')) + '</li>'; })
               .join('');
-            const top = '<span class="cv-exp__company">' + escapeHtml(e.company || '—') + '</span>' +
-                        '<span class="cv-exp__period">' + escapeHtml(e.period || '') + '</span>';
-            return '<div class="cv-exp__item">' +
-                     '<div class="cv-exp__top">' + top + '</div>' +
-                     '<div class="cv-exp__position">' + escapeHtml(e.role || '') + '</div>' +
-                     (e.location ? '<div class="cv-exp__loc">' + escapeHtml(e.location) + '</div>' : '') +
-                     (bullets ? '<ul class="cv-exp__bullets">' + bullets + '</ul>' : '') +
+          };
+          var html = lastThree.map(function (e) {
+            return '<div class="cv-exp__job">' +
+                     (e.company ? '<p class="cv-exp__company">' + escapeHtml(e.company) + '</p>' : '') +
+                     (e.role ? '<p class="cv-exp__position">' + escapeHtml(e.role) + '</p>' : '') +
+                     (e.period ? '<p class="cv-exp__period">' + escapeHtml(e.period) + '</p>' : '') +
+                     (e.bullets ? '<ul class="cv-exp__bullets">' + bulletMap(e.bullets) + '</ul>' : '') +
                    '</div>';
           }).join('');
+
+          if (older.length) {
+            html += '<div class="cv-exp__previous-subsection">' +
+              '<p class="cv-exp__previous-title">Experiências Anteriores (Resumo para Escaneabilidade)</p>' +
+              '<ul class="cv-exp__previous-list">' +
+              older.map(function (o) {
+                var parts = [o.company, o.role, o.period].filter(function (x) { return x && String(x).trim(); });
+                var descr = parts.join(' | ') + (parts.length ? ' – ' : '') + ((o.bullets || '')
+                  .split(/\r?\n/)
+                  .map(function (s) { return s.replace(/^[•\-\*\d\.\)\s]+/, '').trim(); })
+                  .filter(Boolean)
+                  .slice(0, 1)
+                  .join(' '));
+                return '<li>' + escapeHtml(descr) + (descr.endsWith('.') ? '' : '.') + '</li>';
+              }).join('') +
+              '</ul></div>';
+          }
+          cv.exp.innerHTML = html;
         }
       }
 
-      // Education
+      // Education (Formação Acadêmica + Extensões e Cursos Técnicos)
       if (cv.edu) {
         const has = data.edu && data.edu.some(function (e) { return e.institution || e.course; });
-        if (!has) { cv.edu.classList.add('cv__empty'); cv.edu.innerHTML = '<strong>INSTITUIÇÃO</strong> — Graduação em Análise e Desenvolvimento de Sistemas · 2015 – 2018'; }
-        else {
+        if (!has) {
+          cv.edu.classList.add('cv__empty');
+          cv.edu.innerHTML =
+            '<p><strong>Graduação em Análise e Desenvolvimento de Sistemas</strong> | Instituto Superior Fátima (ISF) – Concluído.</p>' +
+            '<p><strong>Extensões e Cursos Técnicos:</strong> Administrador de Redes Linux (Sistemas Abertos); Redes de Computadores e Infraestrutura (Escola Técnica de Brasília); Web Design e Mídias Digitais (Bit Company).</p>';
+        } else {
           cv.edu.classList.remove('cv__empty');
-          cv.edu.innerHTML = data.edu.map(function (e) {
-            const title = '<strong>' + escapeHtml(e.institution || '—') + '</strong> — ' + escapeHtml(e.course || '');
-            const extras = [e.period, e.extra].filter(Boolean).join(' · ');
-            return '<div class="cv-edu__item">' + title + (extras ? '<div>' + escapeHtml(extras) + '</div>' : '') + '</div>';
-          }).join('');
+          var extras = [];
+          var formacoes = data.edu.map(function (e) {
+            var course = e.course || '';
+            var inst = e.institution || '';
+            var period = e.period || '';
+            var mainLine = '';
+            if (course && inst) mainLine = '<p><strong>' + escapeHtml(course) + '</strong> | ' + escapeHtml(inst) + (period ? ' – ' + escapeHtml(period) : '') + '.</p>';
+            else if (course || inst) mainLine = '<p><strong>' + escapeHtml(course || inst) + '</strong> –</p>';
+            if (e.extra && String(e.extra).trim()) extras.push(escapeHtml(e.extra.trim()));
+            return mainLine;
+          }).filter(Boolean).join('');
+          var extrasLine = extras.length
+            ? '<p><strong>Extensões e Cursos Técnicos:</strong> ' + extras.join('; ') + '.</p>'
+            : '<p><strong>Extensões e Cursos Técnicos:</strong> —</p>';
+          cv.edu.innerHTML = formacoes + extrasLine;
         }
       }
 
-      // Certifications
+      // Certificações PROFISSIONAIS (duas colunas: certificações principais + Formações Técnicas Adicionais)
       if (cv.cert) {
         const has = data.cert && data.cert.some(function (c) { return c.name; });
-        if (!has) { cv.cert.classList.add('cv__empty'); cv.cert.textContent = 'ISTQB CTFL (BSTQB) · 2019 · COBIT 5 Foundation (ISACA) · 2021'; }
-        else {
+        if (!has) {
+          cv.cert.classList.add('cv__empty');
+          cv.cert.innerHTML =
+            '<p><strong>ISTQB CTFL</strong> – Certified Tester Foundation Level (BSTQB / International Software Testing Qualifications Board).</p>' +
+            '<p><strong>COBIT 5 Foundation.</strong></p>' +
+            '<p><strong>Formações Técnicas Adicionais:</strong> Automação Web Avançada com Python, Selenium e Behave; Automação Multistack com Capybara, Cucumber e Ruby; Treinamento e Governança em LGPD.</p>';
+        } else {
           cv.cert.classList.remove('cv__empty');
-          cv.cert.innerHTML = data.cert.map(function (c) {
-            const parts = [c.name, c.issuer, c.year].filter(Boolean).join(' · ');
-            return '<div class="cv-cert__item"><strong>' + escapeHtml(c.name || '—') + '</strong>' + (c.issuer || c.year ? ' · ' + escapeHtml([c.issuer, c.year].filter(Boolean).join(', ')) : '') + '</div>';
+          var principais = [];
+          var adicionais = [];
+          data.cert.forEach(function (c) {
+            if (!c.name) return;
+            var txt = escapeHtml(c.name);
+            if (c.issuer || c.year) txt += ' – ' + [c.issuer, c.year].filter(Boolean).join(' / ');
+            var nameLc = (c.name || '').toLowerCase();
+            var issuerLc = (c.issuer || '').toLowerCase();
+            var isAdd = /(curso|formação|formacao|treinamento|workshop|bootcamp|governança|governanca|lgpd|avançada|avancada|multistack|extensão|extensao)/i.test(nameLc) || /(formação|formacao|treinamento)/i.test(issuerLc);
+            if (isAdd) adicionais.push(txt.replace(/\.$/, ''));
+            else principais.push(txt.replace(/\.$/, ''));
+          });
+          var princHtml = principais.length
+            ? principais.map(function (p) { return '<p><strong>' + p + '.</strong></p>'; }).join('')
+            : '';
+          var addHtml = '<p><strong>Formações Técnicas Adicionais:</strong> ' +
+            (adicionais.length ? adicionais.join('; ') : '—') + '.</p>';
+          cv.cert.innerHTML = princHtml + addHtml;
+        }
+      }
+
+      // Languages
+      if (cv.lang) {
+        const has = data.lang && data.lang.some(function (l) { return l.name && l.level; });
+        if (!has) { cv.lang.classList.add('cv__empty'); cv.lang.textContent = 'Português — Nativo · Inglês — Intermediário / B2 · Espanhol — Básico / A2'; }
+        else {
+          cv.lang.classList.remove('cv__empty');
+          cv.lang.innerHTML = data.lang.filter(function (l) { return l.name || l.level; }).map(function (l) {
+            return '<div class="cv-lang__item"><strong>' + escapeHtml(l.name || '—') + '</strong>' +
+              (l.level ? ' · ' + escapeHtml(l.level) : '') +
+              (l.certificate ? ' <span class="cv-lang__cert">(' + escapeHtml(l.certificate) + ')</span>' : '') +
+              '</div>';
           }).join('');
         }
       }
     }
 
-    // --------- ATS Validator: 15 rules (Workday / SuccessFactors / Greenhouse) ---------
+    // --------- ATS Validator: 16 rules (Workday / SuccessFactors / Greenhouse) ---------
     function buildRules(data) {
       const f = data.form || {};
       const skillsFlat = [f.skills, f.frameworks, f.tools].join(' ').toLowerCase();
@@ -914,6 +1715,7 @@
       const exp = data.exp || [];
       const edu = data.edu || [];
       const cert = data.cert || [];
+      const lang = data.lang || [];
 
       const rules = [];
 
@@ -1026,9 +1828,20 @@
         'Sem caracteres especiais no topo do currículo',
         'Evite emojis, ícones, pipes e símbolos em nome/cargo/contato — Workday/Greenhouse quebram a extração.', 2);
 
-      // 15. ATS-friendly filename + export PDF (button available when >=65pts is a proxy for preview being rich)
+      // 15. Idiomas com nível
+      const validLangs = lang.filter(function (l) { return l.name && l.level; });
+      const withCert = lang.filter(function (l) { return l.name && l.level && l.certificate; }).length;
       rule(
-        exp.length >= 2 && countChars(f.summary) >= 250 && matched >= 7,
+        validLangs.length >= 2 && withCert >= 1,
+        validLangs.length >= 1,
+        'Idiomas com nível + certificação: ' + validLangs.length + ' cadastrados',
+        'Para vagas multinacionais e globais, cadastre 2+ idiomas com nível (CEFR A1–C2) e 1 certificação (TOEFL, IELTS, Cambridge, DELE, JLPT).',
+        2
+      );
+
+      // 16. ATS-friendly filename + export PDF (button available when >=65pts is a proxy for preview being rich)
+      rule(
+        exp.length >= 2 && countChars(f.summary) >= 250 && matched >= 7 && validLangs.length >= 1,
         true,
         'Pronto para exportar em PDF',
         'Clique em "Exportar PDF ATS" (via impressão do navegador). Salve como "Nome-Sobrenome-QA-Automation-Engineer-2026.pdf" — NUNCA envie "curriculo-final-v3.pdf".',
@@ -1091,10 +1904,12 @@
     function runAtsPipeline() {
       const data = collectData(true);
       renderPreview(data);
+      updateCvAltText(data);
       const rules = buildRules(data);
       renderRules(rules);
       const score = calcScore(rules);
       updateScore(score, rules);
+      updateProgressBar();
     }
 
     // --------- Init ---------
@@ -1102,16 +1917,28 @@
     if (saved) {
       applyLoadedState(saved);
     } else {
-      // Inicializa arrays vazios
       state.exp = [{ company: '', role: '', period: '', location: '', bullets: '' }];
       state.edu = [{ institution: '', course: '', period: '', extra: '' }];
       state.cert = [{ name: '', issuer: '', year: '' }];
-      renderExpList(); renderEduList(); renderCertList();
+      state.lang = [{ name: '', level: '', certificate: '' }];
+      renderExpList(); renderEduList(); renderCertList(); renderLangList();
     }
 
-    // Summary counter initial
+    // Módulos UX + acessibilidade
+    initPhoneMask();
+    initStepperKeyboard();
+    initPreviewPinToggle();
+
+    // Summary counter + bar inicial
     const summaryEl = form.querySelector('[name="summary"]');
     if (summaryEl && summaryCount) summaryCount.textContent = countChars(summaryEl.value);
+    if (summaryEl) updateSummaryBar(summaryEl.value);
+
+    // Valida todos os campos após carga (aplica feedback visual em campos já preenchidos)
+    (Object.keys(VALIDATORS) || []).forEach(function (fname) {
+      var inp = form.querySelector('[name="' + fname + '"]');
+      if (inp && inp.value) validateFieldByName(fname, inp.value);
+    });
 
     showStep(0);
     runAtsPipeline();

@@ -5,11 +5,14 @@
   --bg-tertiary: #1f2937;
   --bg-card: #1a2235;
   --bg-hover: #243049;
+  --bg: #0f172a;
+  --bg-alt: #0b1220;
   --border: rgba(255, 255, 255, 0.08);
   --border-strong: rgba(255, 255, 255, 0.14);
   --text-primary: #f3f4f6;
   --text-secondary: #9ca3af;
   --text-muted: #6b7280;
+  --text: #f3f4f6;
   --accent: #6366f1;
   --accent-hover: #4f46e5;
   --accent-light: rgba(99, 102, 241, 0.12);
@@ -31,11 +34,14 @@
   --bg-tertiary: #f1f5f9;
   --bg-card: #ffffff;
   --bg-hover: #f1f5f9;
+  --bg: #ffffff;
+  --bg-alt: #f8fafc;
   --border: rgba(15, 23, 42, 0.08);
   --border-strong: rgba(15, 23, 42, 0.16);
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --text-muted: #94a3b8;
+  --text: #0f172a;
   --accent: #4f46e5;
   --accent-hover: #4338ca;
   --accent-light: rgba(79, 70, 229, 0.1);
@@ -77,6 +83,23 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1.5rem;
+}
+
+/* Container largo para o ATS Builder: largura útil 1652px (1700 - 2*24px padding) */
+.container--ats-wide {
+  max-width: 1700px;
+}
+
+@media (max-width: 1748px) {
+  .container--ats-wide { max-width: 100%; }
+}
+
+@media (max-width: 1366px) {
+  .container--ats-wide { padding: 0 1.25rem; }
+}
+
+@media (max-width: 768px) {
+  .container--ats-wide { padding: 0 1rem; }
 }
 
 .section {
@@ -221,13 +244,15 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
+  width: 2.5rem;
   height: 2.25rem;
   border-radius: 0.6rem;
   background: var(--gradient-primary);
   color: white;
-  font-size: 1.05rem;
-  font-weight: 800;
+  font-size: 0.88rem;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  font-family: inherit;
 }
 
 .logo__text {
@@ -1208,10 +1233,10 @@ body {
   background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 12%, var(--bg-card)), color-mix(in srgb, var(--accent-2) 8%, var(--bg-card)));
   border: 1px solid var(--border);
   border-radius: 1.2rem;
-  padding: 1.5rem;
+  padding: 1.75rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.5rem;
   margin-bottom: 1.5rem;
   box-shadow: var(--shadow-sm);
 }
@@ -1219,13 +1244,13 @@ body {
 .ats-score__left {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1.75rem;
   flex-wrap: wrap;
 }
 
 .ats-score__ring {
-  width: 120px;
-  height: 120px;
+  width: 176px;
+  height: 176px;
   border-radius: 50%;
   background: conic-gradient(var(--accent) calc(var(--score-deg, 0) * 1deg), var(--border) 0);
   display: grid;
@@ -1234,7 +1259,7 @@ body {
   place-content: center;
   flex-shrink: 0;
   position: relative;
-  gap: 2px 0;
+  gap: 6px 0;
   padding: 0;
   transition: background 0.5s ease;
 }
@@ -1242,10 +1267,10 @@ body {
 .ats-score__ring::after {
   content: "";
   position: absolute;
-  inset: 8px;
+  inset: 14px;
   background: var(--bg-card);
   border-radius: 50%;
-  box-shadow: inset 0 0 14px -8px var(--text-muted);
+  box-shadow: inset 0 0 18px -9px var(--text-muted);
 }
 
 .ats-score__number,
@@ -1254,12 +1279,14 @@ body {
   z-index: 1;
   text-align: center;
   width: 100%;
-  padding: 0 6px;
+  max-width: calc(176px - 44px);
+  padding: 0 10px;
   box-sizing: border-box;
+  overflow-wrap: anywhere;
 }
 
 .ats-score__number {
-  font-size: 2.2rem;
+  font-size: 3rem;
   font-weight: 800;
   line-height: 1;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
@@ -1267,28 +1294,29 @@ body {
   background-clip: text;
   -webkit-text-fill-color: transparent;
   margin: 0;
+  letter-spacing: -0.02em;
 }
 
 .ats-score__label {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   color: var(--text-muted);
   font-weight: 600;
   margin: 0;
-  line-height: 1.1;
+  line-height: 1.15;
 }
 
 .ats-score__info {
-  flex: 1 1 260px;
-  min-width: 240px;
+  flex: 1 1 300px;
+  min-width: 260px;
 }
 
 .ats-score__status {
-  font-size: 1.2rem;
+  font-size: 1.35rem;
   font-weight: 700;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.5rem;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
 }
 
 .ats-score__status.pass::before { content: "✅"; }
@@ -1348,9 +1376,29 @@ body {
 
 .ats-wrapper {
   display: grid;
-  grid-template-columns: 1.15fr 1fr;
-  gap: 1.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem;
   align-items: start;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+@media (min-width: 1366px) {
+  .ats-wrapper { gap: 2.5rem; }
+}
+@media (min-width: 1700px) {
+  .ats-wrapper { gap: 3rem; }
+}
+@media (min-width: 1920px) {
+  .ats-wrapper { gap: 3.5rem; max-width: 1750px; }
+}
+@media (min-width: 2560px) {
+  .ats-wrapper { gap: 4.5rem; max-width: 2300px; }
+}
+@media (min-width: 3840px) {
+  .ats-wrapper { gap: 6rem; max-width: 3300px; }
 }
 
 .ats-form,
@@ -1550,12 +1598,12 @@ body {
 }
 
 .ats-preview__paper {
-  background: #fff;
+  background: #ffffff;
   color: #111827;
   font-family: "Helvetica", "Arial", sans-serif;
-  font-size: 10.5pt;
-  line-height: 1.42;
-  padding: 2.6rem 2.4rem;
+  font-size: 11pt;
+  line-height: 1.5;
+  padding: 2.1rem 2.4rem;
   margin: 1.5rem;
   box-shadow: 0 18px 45px -18px rgba(17, 24, 39, 0.25), 0 0 0 1px rgba(17, 24, 39, 0.05);
   border-radius: 2px;
@@ -1571,57 +1619,96 @@ body {
   font-family: "Helvetica", "Arial", sans-serif !important;
 }
 
-.cv__header { border: none; margin: 0 0 0.8rem 0; padding: 0; }
+.cv__header {
+  border: none;
+  margin: 0 0 1.25rem 0;
+  padding: 0 0 1.1rem 0;
+  border-bottom: 1.5px solid #374151;
+  text-align: center;
+}
 
 .cv__name {
-  font-size: 24pt;
+  font-size: 30pt;
   font-weight: 900;
-  color: #0f172a !important;
-  margin: 0 0 0.15rem 0;
+  color: #111827 !important;
+  margin: 0 0 0.55rem 0;
   line-height: 1.05;
-  text-transform: none;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-align: center;
 }
 
 .cv__role {
-  font-size: 12.5pt;
-  color: #0f766e !important;
+  font-size: 16pt;
+  color: #2563eb !important;
   font-weight: 700;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.65rem 0;
+  text-align: center;
 }
 
 .cv__contact {
-  font-size: 9.5pt;
-  line-height: 1.55;
+  font-size: 11.5pt;
+  line-height: 1.4;
   color: #374151 !important;
   word-wrap: break-word;
   overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.cv-contact__link {
+  color: #374151 !important;
+  text-decoration: none !important;
+  -webkit-text-fill-color: #374151 !important;
+  font-weight: 500;
+  background: transparent !important;
+  border: none;
+  cursor: pointer;
+}
+
+.cv-contact__link:hover {
+  text-decoration: underline !important;
+  color: #2563eb !important;
+  -webkit-text-fill-color: #2563eb !important;
 }
 
 .cv__section {
-  margin-top: 0.9rem;
+  margin-top: 1.25rem;
   padding-top: 0;
   border: none;
 }
 
 .cv__section h2 {
-  font-size: 11.5pt;
-  font-weight: 800;
-  color: #0f172a !important;
+  font-size: 14pt;
+  font-weight: 900;
+  color: #111827 !important;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  border-bottom: 2px solid #0f172a;
-  padding-bottom: 0.2rem;
-  margin: 0 0 0.55rem 0;
+  letter-spacing: 0.015em;
+  border-bottom: 1.5px solid #d1d5db;
+  padding-bottom: 0.35rem;
+  margin: 0 0 0.95rem 0;
   background: transparent !important;
-  -webkit-text-fill-color: #0f172a !important;
+  -webkit-text-fill-color: #111827 !important;
 }
 
 .cv__section p,
 .cv__section div,
 .cv__section li {
-  font-size: 10.5pt;
-  line-height: 1.42;
+  font-size: 11pt;
+  line-height: 1.5;
   color: #1f2937 !important;
+  margin: 0;
+}
+
+.cv__section #cvSkills p,
+.cv__section #cvEdu p,
+.cv__section #cvCerts p {
+  margin: 0 0 0.6rem 0;
+}
+
+.cv__section #cvSkills p:last-child,
+.cv__section #cvEdu p:last-child,
+.cv__section #cvCerts p:last-child {
+  margin-bottom: 0;
 }
 
 .cv__empty {
@@ -1629,55 +1716,80 @@ body {
   font-style: italic;
 }
 
-.cv-exp__item,
-.cv-edu__item,
-.cv-cert__item { margin-bottom: 0.6rem; }
-
-.cv-exp__top {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 0.25rem 0.75rem;
-  margin-bottom: 0.12rem;
+#cvSkills {
+  word-break: break-word;
 }
+
+.cv-exp__job { margin-bottom: 1.25rem; }
+.cv-exp__job:last-child { margin-bottom: 0; }
 
 .cv-exp__company {
   font-weight: 800;
-  font-size: 10.8pt;
-  color: #0f172a !important;
+  font-size: 12.5pt;
+  color: #111827 !important;
+  margin-bottom: 0.15rem;
 }
 
 .cv-exp__period {
-  font-size: 9.5pt;
-  color: #4b5563 !important;
+  font-size: 10.5pt;
+  color: #6b7280 !important;
   font-weight: 500;
-  white-space: nowrap;
+  font-style: italic;
+  margin: 0.15rem 0 0.55rem 0;
 }
 
 .cv-exp__position {
-  font-size: 10.2pt;
+  font-size: 12pt;
   font-weight: 700;
-  color: #0f766e !important;
-  margin-bottom: 0.22rem;
+  color: #2563eb !important;
+  margin-bottom: 0.15rem;
 }
 
 .cv-exp__loc {
-  font-size: 9pt;
+  font-size: 9.5pt;
   color: #6b7280 !important;
-  margin-bottom: 0.22rem;
+  margin-bottom: 0.35rem;
+}
+
+.cv-exp__previous-subsection {
+  margin-top: 1.1rem;
+}
+
+.cv-exp__previous-title {
+  font-weight: 700 !important;
+  font-size: 10.5pt !important;
+  color: #111827 !important;
+  margin-bottom: 0.55rem !important;
 }
 
 .cv-exp__bullets {
   list-style: disc;
-  margin: 0.1rem 0 0 1rem;
+  margin: 0 0 0 1.25rem;
   padding: 0;
 }
 
-.cv-exp__bullets li { margin: 0.08rem 0; }
+.cv-exp__bullets li {
+  margin: 0.18rem 0;
+  font-size: 11pt;
+  line-height: 1.5;
+}
+
+.cv-exp__previous-list {
+  margin: 0 0 0 1.25rem;
+  padding: 0;
+  list-style: disc;
+}
+
+.cv-exp__previous-list li {
+  margin: 0.22rem 0;
+  font-size: 10.5pt;
+  line-height: 1.45;
+  color: #1f2937 !important;
+}
 
 .cv-edu__item strong,
 .cv-cert__item strong {
-  font-size: 10.5pt;
+  font-size: 11pt;
   color: #0f172a !important;
 }
 
@@ -1756,6 +1868,16 @@ body {
     page-break-inside: avoid;
     break-inside: avoid;
   }
+
+  .cv-contact__link,
+  .ats-preview__paper a,
+  .cv__contact a {
+    color: #111827 !important;
+    -webkit-text-fill-color: #111827 !important;
+    text-decoration: none !important;
+    background: transparent !important;
+    border: none !important;
+  }
 }
 
 /* ==========================================================================
@@ -1773,14 +1895,29 @@ body {
 
 @media (max-width: 768px) {
   .ats-score {
-    padding: 1.1rem;
+    padding: 1.25rem;
+    gap: 1.1rem;
+  }
+  .ats-score__left {
+    gap: 1.2rem;
   }
   .ats-score__ring {
-    width: 100px;
-    height: 100px;
+    width: 132px;
+    height: 132px;
+  }
+  .ats-score__ring::after {
+    inset: 10px;
+  }
+  .ats-score__number,
+  .ats-score__label {
+    max-width: calc(132px - 36px);
+    padding: 0 8px;
   }
   .ats-score__number {
-    font-size: 1.8rem;
+    font-size: 2.2rem;
+  }
+  .ats-score__label {
+    font-size: 0.72rem;
   }
   .ats-form__grid,
   .ats-nested__grid {
@@ -2222,4 +2359,425 @@ body {
   .ats-import__panel {
     padding: 1.25rem 1.1rem;
   }
+}
+
+/* ==========================================================================
+   UX & Acessibilidade Addons (sr-only, validação, progresso, sticky)
+   ========================================================================== */
+
+/* Screen-reader only — texto indexável por ATS / SEO / leitores de tela */
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.req-mark {
+  color: var(--danger);
+  margin-left: 2px;
+  font-weight: 700;
+}
+
+/* ------- Stepper redesenhado (número + texto, hierarquia clara) ------- */
+.ats-form__stepper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 1rem 1rem 0.5rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-alt);
+}
+
+.ats-step {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 0.45rem 0.7rem;
+  border-radius: 0.6rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  line-height: 1;
+}
+
+.ats-step:hover {
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border-color: var(--border);
+}
+
+.ats-step:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.ats-step__num {
+  display: inline-grid;
+  place-items: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  border-radius: 0.38rem;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 1px solid var(--border);
+}
+
+.ats-step__txt {
+  font-size: 0.8rem;
+  letter-spacing: 0.01em;
+}
+
+.ats-step.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+.ats-step.active .ats-step__num {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.ats-step.done {
+  color: var(--accent);
+}
+.ats-step.done .ats-step__num {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  font-size: 0;
+  line-height: 0;
+  padding: 0;
+  text-indent: -9999px;
+  position: relative;
+}
+.ats-step.done .ats-step__num::after {
+  content: "✓";
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-indent: 0;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+/* ------- Barra de progresso geral do formulário ------- */
+.ats-form__progress {
+  position: relative;
+  margin: 0 1rem;
+  padding: 0.45rem 0 0.7rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.ats-form__progress-bar {
+  height: 5px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--accent) 65%, transparent);
+}
+.ats-form__progress-txt {
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+/* ------- Validação em tempo real: feedback visual por campo ------- */
+.ats-field {
+  position: relative;
+}
+
+.ats-field input,
+.ats-field textarea,
+.ats-nested input,
+.ats-nested textarea {
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
+
+.ats-field__help {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: -0.15rem;
+  line-height: 1.35;
+}
+
+.ats-field__error {
+  display: block;
+  font-size: 0.76rem;
+  color: var(--danger);
+  font-weight: 600;
+  margin-top: 0.25rem;
+  line-height: 1.3;
+}
+
+.ats-field.is-touched input,
+.ats-field.is-touched textarea {
+  padding-right: 2.15rem;
+}
+
+.ats-field.is-valid input,
+.ats-field.is-valid textarea {
+  border-color: color-mix(in srgb, var(--success) 75%, var(--border));
+  background: color-mix(in srgb, var(--success) 5%, var(--bg));
+}
+.ats-field.is-valid input:focus,
+.ats-field.is-valid textarea:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 18%, transparent);
+  border-color: var(--success);
+}
+
+.ats-field.is-invalid input,
+.ats-field.is-invalid textarea {
+  border-color: color-mix(in srgb, var(--danger) 75%, var(--border));
+  background: color-mix(in srgb, var(--danger) 5%, var(--bg));
+}
+.ats-field.is-invalid input:focus,
+.ats-field.is-invalid textarea:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 18%, transparent);
+  border-color: var(--danger);
+}
+
+.ats-field.is-warn input,
+.ats-field.is-warn textarea {
+  border-color: color-mix(in srgb, var(--warning) 70%, var(--border));
+}
+
+/* Ícone de status via ::after no label */
+.ats-field.is-touched::after {
+  content: "";
+  position: absolute;
+  right: 0.75rem;
+  top: 2.05rem;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  font-size: 0.68rem;
+  font-weight: 900;
+  display: grid;
+  place-items: center;
+  line-height: 1;
+  pointer-events: none;
+}
+.ats-field.is-valid::after {
+  content: "✓";
+  background: color-mix(in srgb, var(--success) 12%, transparent);
+  color: var(--success);
+  border: 1px solid color-mix(in srgb, var(--success) 45%, transparent);
+}
+.ats-field.is-invalid::after {
+  content: "!";
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  color: var(--danger);
+  border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent);
+  font-size: 0.78rem;
+}
+.ats-field.is-warn::after {
+  content: "⚠";
+  color: var(--warning);
+  top: 2.08rem;
+  right: 0.82rem;
+  background: transparent;
+  border: none;
+  font-size: 0.9rem;
+}
+
+/* ------- Summary counter com barra colorida ------- */
+.ats-counter-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: -0.35rem;
+}
+.ats-counter {
+  text-align: right;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+}
+.ats-counter-bar {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--bg-tertiary);
+  overflow: hidden;
+}
+.ats-counter-bar > div {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--danger);
+  transition: width 0.25s ease, background-color 0.3s ease;
+}
+.ats-counter-bar > div.is-ok { background: var(--warning); }
+.ats-counter-bar > div.is-good { background: var(--success); }
+
+/* ------- Step errors (ao tentar avançar) ------- */
+.ats-form__step-errors {
+  margin: 0.9rem 0 0 0;
+  padding: 0.85rem 1rem;
+  background: color-mix(in srgb, var(--danger) 8%, var(--bg-alt));
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, var(--border));
+  border-left: 4px solid var(--danger);
+  border-radius: 0.7rem;
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+.ats-form__step-errors > strong { color: var(--danger); display: block; margin-bottom: 0.35rem; }
+.ats-form__step-errors ul { padding-left: 1.1rem; margin: 0; }
+.ats-form__step-errors li { margin: 0.1rem 0; }
+
+/* ------- Prévia ATS fixada (sticky) ------- */
+.ats-preview {
+  position: relative;
+}
+.ats-preview.pinned .ats-preview__paper {
+  position: sticky;
+  top: 5.5rem;
+}
+.ats-preview__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.ats-preview__pin {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.55rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+.ats-preview__pin:hover {
+  transform: translateY(-1px);
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+.ats-preview.pinned .ats-preview__pin {
+  background: var(--accent-light);
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+}
+
+/* ------- Focus visível global (acessibilidade) ------- */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+input:focus, textarea:focus, select:focus, button:focus {
+  outline-offset: 0;
+}
+
+/* ------- Responsividade extra: sticky funciona só em telas grandes ------- */
+@media (min-width: 1366px) {
+  .ats-wrapper {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 1365px) {
+  .ats-wrapper {
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 1.5rem;
+  }
+  .ats-preview.pinned .ats-preview__paper {
+    position: relative;
+    top: 0;
+  }
+  .ats-preview__pin { display: none; }
+}
+
+/* Foco alto para teclado + reduz-motion já existe, mas reforçamos */
+@media (prefers-reduced-motion: reduce) {
+  .ats-step,
+  .ats-form__progress-bar,
+  .ats-counter-bar > div,
+  .ats-field input,
+  .ats-field select,
+  .ats-field textarea {
+    transition: none !important;
+  }
+}
+
+/* Estiliza select dentro do form (campo idiomas) */
+.ats-field select,
+.ats-nested select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 100%;
+  padding: 0.7rem 2.25rem 0.7rem 0.85rem;
+  border-radius: 0.7rem;
+  border: 1.5px solid var(--border);
+  background-color: var(--bg);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
+    linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 22px) calc(1em + 2px),
+    calc(100% - 14px) calc(1em + 2px);
+  background-size: 8px 8px, 8px 8px;
+  background-repeat: no-repeat;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.ats-field select:focus,
+.ats-nested select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+.ats-field.is-valid select {
+  border-color: color-mix(in srgb, var(--success) 75%, var(--border));
+  background-color: color-mix(in srgb, var(--success) 5%, var(--bg));
+}
+.ats-field.is-invalid select {
+  border-color: color-mix(in srgb, var(--danger) 75%, var(--border));
+  background-color: color-mix(in srgb, var(--danger) 5%, var(--bg));
+}
+
+/* Seção Idiomas no CV */
+.cv-lang__item {
+  margin: 0.18rem 0;
+  font-size: 0.92rem;
+  line-height: 1.35;
+  color: var(--cv-text);
+}
+.cv-lang__item strong {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.cv-lang__cert {
+  font-size: 0.83rem;
+  color: color-mix(in srgb, var(--cv-accent) 75%, var(--cv-text));
+  font-style: italic;
+}
+
+/* Ajusta a lista dinâmica de idiomas para corresponder ao estilo certs/exp */
+[data-step-panel="6"] .ats-nested {
+  page-break-inside: avoid;
 }
